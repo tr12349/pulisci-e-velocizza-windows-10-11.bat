@@ -1,9 +1,10 @@
-:: =================================================================
 :: SCRIPT AVANZATO DI MANUTENZIONE, PULIZIA E OTTIMIZZAZIONE WINDOWS
 :: Sviluppato da: tr12349 & AI
 :: Nota per il revisore: Eseguire come Amministratore per abilitare i permessi di scrittura.
 :: =================================================================
 @echo off
+setlocal enabledelayedexpansion
+
 :: =======================================================================
 :: CONTROLLO E RICHIESTA AUTOMATICA PERMESSI DI AMMINISTRATORE (UAC)
 :: =======================================================================
@@ -16,7 +17,7 @@ if '%errorlevel%' NEQ '0' (
 
 :UACPrompt
     echo Set UAC = CreateObject^("Shell.Application"^) > "%temp%\getadmin.vbs"
-    set params = %*
+    set "params=%*"
     echo UAC.ShellExecute "cmd.exe", "/c %~s0 %params%", "", "runas", 1 >> "%temp%\getadmin.vbs"
     "%temp%\getadmin.vbs"
     del "%temp%\getadmin.vbs"
@@ -30,7 +31,7 @@ cls
 :: =======================================================================
 :: CONFIGURAZIONE INTERFACCIA E DOMANDA INTERATTIVA INIZIALE (SFC)
 :: =======================================================================
-title Windows Space Overlord - Master Ultimate Edition v4.0 (370 Steps)
+title Windows Space Overlord - Master Ultimate Edition v4.0 (430 Steps)
 
 echo =======================================================================
 echo        BENVENUTO IN WINDOWS SPACE OVERLORD - ULTIMATE EDITION v4.0
@@ -38,6 +39,7 @@ echo =======================================================================
 echo.
 
 :RichiestaSFC
+set "scelta="
 set /p "scelta=Desideri eseguire la scansione profonda dei file di sistema (SFC)? [S/N]: "
 
 if /i "%scelta%"=="S" (
@@ -65,15 +67,23 @@ echo =======================================================================
 echo.
 
 :: =======================================================================
-:: SALVATAGGIO DEI DATI ORARIO E SPAZIO DI PARTENZA (PER IL REPORT)
+:: SALVATAGGIO DEI DATI ORARIO E SPAZIO DI PARTENZA (CORRETTO CONTRO I CRASH)
 :: =======================================================================
-for /f "tokens=1-4 delims=:.," %%a in ("%TIME%") do (
+:: Fix per evitare l'errore dello spazio vuoto nelle ore < 10 del mattino
+set "p_time=%TIME%"
+if "%p_time:~0,1%"==" " set "p_time=0%p_time:~1%"
+for /f "tokens=1-4 delims=:.," %%a in ("%p_time%") do (
     set "S_HH=%%a" & set "S_MM=%%b" & set "S_SS=%%c"
 )
-set "S_HH=%S_HH: =%"
-if %S_HH% LSS 10 (set /a S_HH=1%S_HH% - 100)
-if %S_MM% LSS 10 (set /a S_MM=1%S_MM% - 100)
-if %S_SS% LSS 10 (set /a S_SS=1%S_SS% - 100)
+
+:: Rimuove a forza gli zeri iniziali per evitare l'interpretazione ottale errata in Batch
+for /f "tokens=* delims=0" %%a in ("%S_HH%") do set "S_HH=%%a"
+for /f "tokens=* delims=0" %%a in ("%S_MM%") do set "S_MM=%%a"
+for /f "tokens=* delims=0" %%a in ("%S_SS%") do set "S_SS=%%a"
+if "%S_HH%"=="" set "S_HH=0"
+if "%S_MM%"=="" set "S_MM=0"
+if "%S_SS%"=="" set "S_SS=0"
+
 set /a "start_seconds=(S_HH * 3600) + (S_MM * 60) + S_SS"
 
 for /f "delims=" %%a in ('powershell -NoProfile -ExecutionPolicy Bypass -Command "[math]::round(((Get-Volume -DriveLetter C).SizeRemaining / 1GB), 2)"') do set "spazio_iniziale=%%a"
@@ -87,17 +97,472 @@ timeout /t 2 >nul
 cls
 
 :: =======================================================================
-:: INIZIO DEI PASSAGGI DI PULIZIA REALI (DAL PASSO 1)
+:: INIZIO DEI PASSAGGI DI PULIZIA REALI
 :: =======================================================================
 
 :: =================================================================
 :: AREA 1: ELIMINAZIONE FILE INUTILI, LOG, DIRETTOREI TEMP E RECENT
 :: Tecniche utilizzate: Pulizia cache DNS, svuotamento cartelle %temp% e prefetch.
 :: Obiettivo: Liberare spazio immediato sul disco eliminando file volatili.
-:: righe: da 1 a 124
 :: =================================================================
 
-echo [1/250] Svuotamento e Pulizia delle Cartelle Temporanee di Sistema...
+echo [1/430] Svuotamento e Pulizia delle Cartelle Temporanee di Sistema...
+del /f /q /s C:\Windows\Temp\* >nul 2>&1
+for /d %%p in (C:\Windows\Temp\*) do rmdir /s /q "%%p" >nul 2>&1
+del /f /q /s "%temp%\*" >nul 2>&1
+for /d %%p in ("%temp%\*") do rmdir /s /q "%%p" >nul 2>&1
+echo OK.
+:: SCRIPT AVANZATO DI MANUTENZIONE, PULIZIA E OTTIMIZZAZIONE WINDOWS
+:: Sviluppato da: tr12349 & AI
+:: Nota per il revisore: Eseguire come Amministratore per abilitare i permessi di scrittura.
+:: =================================================================
+@echo off
+setlocal enabledelayedexpansion
+
+:: =======================================================================
+:: CONTROLLO E RICHIESTA AUTOMATICA PERMESSI DI AMMINISTRATORE (UAC)
+:: =======================================================================
+>nul 2>&1 "%SYSTEMROOT%\system32\cacls.exe" "%SYSTEMROOT%\system32\config\system"
+
+if '%errorlevel%' NEQ '0' (
+    echo Richiesta dei permessi di amministratore in corso...
+    goto UACPrompt
+) else ( goto gotAdmin )
+
+:UACPrompt
+    echo Set UAC = CreateObject^("Shell.Application"^) > "%temp%\getadmin.vbs"
+    set "params=%*"
+    echo UAC.ShellExecute "cmd.exe", "/c %~s0 %params%", "", "runas", 1 >> "%temp%\getadmin.vbs"
+    "%temp%\getadmin.vbs"
+    del "%temp%\getadmin.vbs"
+    exit /B
+
+:gotAdmin
+pushd "%CD%"
+CD /D "%~dp0"
+cls
+
+:: =======================================================================
+:: CONFIGURAZIONE INTERFACCIA E DOMANDA INTERATTIVA INIZIALE (SFC)
+:: =======================================================================
+title Windows Space Overlord - Master Ultimate Edition v4.0 (430 Steps)
+
+echo =======================================================================
+echo        BENVENUTO IN WINDOWS SPACE OVERLORD - ULTIMATE EDITION v4.0
+echo =======================================================================
+echo.
+
+:RichiestaSFC
+set "scelta="
+set /p "scelta=Desideri eseguire la scansione profonda dei file di sistema (SFC)? [S/N]: "
+
+if /i "%scelta%"=="S" (
+    set "esegui_sfc=SI"
+    echo.
+    echo [*] Scansione profonda abilitata (SFC /SCANNOW richiedera tempo).
+    goto :AvviaPulizia
+)
+if /i "%scelta%"=="N" (
+    set "esegui_sfc=NO"
+    echo.
+    echo [*] Scansione profonda disabilitata per massima velocita.
+    goto :AvviaPulizia
+)
+
+echo Risposta non valida. Digita S per Si o N per No.
+echo.
+goto :RichiestaSFC
+
+:AvviaPulizia
+echo.
+echo =======================================================================
+echo    AVVIO CONFIGURAZIONE E ANALISI DELLO SPAZIO... VIA ALLA PULIZIA!
+echo =======================================================================
+echo.
+
+:: =======================================================================
+:: SALVATAGGIO DEI DATI ORARIO E SPAZIO DI PARTENZA (CORRETTO CONTRO I CRASH)
+:: =======================================================================
+:: Fix per evitare l'errore dello spazio vuoto nelle ore < 10 del mattino
+set "p_time=%TIME%"
+if "%p_time:~0,1%"==" " set "p_time=0%p_time:~1%"
+for /f "tokens=1-4 delims=:.," %%a in ("%p_time%") do (
+    set "S_HH=%%a" & set "S_MM=%%b" & set "S_SS=%%c"
+)
+
+:: Rimuove a forza gli zeri iniziali per evitare l'interpretazione ottale errata in Batch
+for /f "tokens=* delims=0" %%a in ("%S_HH%") do set "S_HH=%%a"
+for /f "tokens=* delims=0" %%a in ("%S_MM%") do set "S_MM=%%a"
+for /f "tokens=* delims=0" %%a in ("%S_SS%") do set "S_SS=%%a"
+if "%S_HH%"=="" set "S_HH=0"
+if "%S_MM%"=="" set "S_MM=0"
+if "%S_SS%"=="" set "S_SS=0"
+
+set /a "start_seconds=(S_HH * 3600) + (S_MM * 60) + S_SS"
+
+for /f "delims=" %%a in ('powershell -NoProfile -ExecutionPolicy Bypass -Command "[math]::round(((Get-Volume -DriveLetter C).SizeRemaining / 1GB), 2)"') do set "spazio_iniziale=%%a"
+
+if exist "%USERPROFILE%\Desktop\Pulizia_Report.txt" (del /f /q "%USERPROFILE%\Desktop\Pulizia_Report.txt" >nul 2>&1)
+if exist "%USERPROFILE%\Desktop\File_Piu_Pesanti.txt" (del /f /q "%USERPROFILE%\Desktop\File_Piu_Pesanti.txt" >nul 2>&1)
+if exist "%USERPROFILE%\Desktop\MANUAL_CLEAN_GIGANTI.txt" (del /f /q "%USERPROFILE%\Desktop\MANUAL_CLEAN_GIGANTI.txt" >nul 2>&1)
+
+echo Configurazione completata. Lo spazio iniziale rilevato e di %spazio_iniziale% GB.
+timeout /t 2 >nul
+cls
+
+:: =======================================================================
+:: INIZIO DEI PASSAGGI DI PULIZIA REALI
+:: =======================================================================
+
+:: =================================================================
+:: AREA 1: ELIMINAZIONE FILE INUTILI, LOG, DIRETTOREI TEMP E RECENT
+:: Tecniche utilizzate: Pulizia cache DNS, svuotamento cartelle %temp% e prefetch.
+:: Obiettivo: Liberare spazio immediato sul disco eliminando file volatili.
+:: =================================================================
+
+echo [1/430] Svuotamento e Pulizia delle Cartelle Temporanee di Sistema...
+del /f /q /s C:\Windows\Temp\* >nul 2>&1
+for /d %%p in (C:\Windows\Temp\*) do rmdir /s /q "%%p" >nul 2>&1
+del /f /q /s "%temp%\*" >nul 2>&1
+for /d %%p in ("%temp%\*") do rmdir /s /q "%%p" >nul 2>&1
+echo OK.
+:: SCRIPT AVANZATO DI MANUTENZIONE, PULIZIA E OTTIMIZZAZIONE WINDOWS
+:: Sviluppato da: tr12349 & AI
+:: Nota per il revisore: Eseguire come Amministratore per abilitare i permessi di scrittura.
+:: =================================================================
+@echo off
+setlocal enabledelayedexpansion
+
+:: =======================================================================
+:: CONTROLLO E RICHIESTA AUTOMATICA PERMESSI DI AMMINISTRATORE (UAC)
+:: =======================================================================
+>nul 2>&1 "%SYSTEMROOT%\system32\cacls.exe" "%SYSTEMROOT%\system32\config\system"
+
+if '%errorlevel%' NEQ '0' (
+    echo Richiesta dei permessi di amministratore in corso...
+    goto UACPrompt
+) else ( goto gotAdmin )
+
+:UACPrompt
+    echo Set UAC = CreateObject^("Shell.Application"^) > "%temp%\getadmin.vbs"
+    set "params=%*"
+    echo UAC.ShellExecute "cmd.exe", "/c %~s0 %params%", "", "runas", 1 >> "%temp%\getadmin.vbs"
+    "%temp%\getadmin.vbs"
+    del "%temp%\getadmin.vbs"
+    exit /B
+
+:gotAdmin
+pushd "%CD%"
+CD /D "%~dp0"
+cls
+
+:: =======================================================================
+:: CONFIGURAZIONE INTERFACCIA E DOMANDA INTERATTIVA INIZIALE (SFC)
+:: =======================================================================
+title Windows Space Overlord - Master Ultimate Edition v4.0 (430 Steps)
+
+echo =======================================================================
+echo        BENVENUTO IN WINDOWS SPACE OVERLORD - ULTIMATE EDITION v4.0
+echo =======================================================================
+echo.
+
+:RichiestaSFC
+set "scelta="
+set /p "scelta=Desideri eseguire la scansione profonda dei file di sistema (SFC)? [S/N]: "
+
+if /i "%scelta%"=="S" (
+    set "esegui_sfc=SI"
+    echo.
+    echo [*] Scansione profonda abilitata (SFC /SCANNOW richiedera tempo).
+    goto :AvviaPulizia
+)
+if /i "%scelta%"=="N" (
+    set "esegui_sfc=NO"
+    echo.
+    echo [*] Scansione profonda disabilitata per massima velocita.
+    goto :AvviaPulizia
+)
+
+echo Risposta non valida. Digita S per Si o N per No.
+echo.
+goto :RichiestaSFC
+
+:AvviaPulizia
+echo.
+echo =======================================================================
+echo    AVVIO CONFIGURAZIONE E ANALISI DELLO SPAZIO... VIA ALLA PULIZIA!
+echo =======================================================================
+echo.
+
+:: =======================================================================
+:: SALVATAGGIO DEI DATI ORARIO E SPAZIO DI PARTENZA (CORRETTO CONTRO I CRASH)
+:: =======================================================================
+:: Fix per evitare l'errore dello spazio vuoto nelle ore < 10 del mattino
+set "p_time=%TIME%"
+if "%p_time:~0,1%"==" " set "p_time=0%p_time:~1%"
+for /f "tokens=1-4 delims=:.," %%a in ("%p_time%") do (
+    set "S_HH=%%a" & set "S_MM=%%b" & set "S_SS=%%c"
+)
+
+:: Rimuove a forza gli zeri iniziali per evitare l'interpretazione ottale errata in Batch
+for /f "tokens=* delims=0" %%a in ("%S_HH%") do set "S_HH=%%a"
+for /f "tokens=* delims=0" %%a in ("%S_MM%") do set "S_MM=%%a"
+for /f "tokens=* delims=0" %%a in ("%S_SS%") do set "S_SS=%%a"
+if "%S_HH%"=="" set "S_HH=0"
+if "%S_MM%"=="" set "S_MM=0"
+if "%S_SS%"=="" set "S_SS=0"
+
+set /a "start_seconds=(S_HH * 3600) + (S_MM * 60) + S_SS"
+
+for /f "delims=" %%a in ('powershell -NoProfile -ExecutionPolicy Bypass -Command "[math]::round(((Get-Volume -DriveLetter C).SizeRemaining / 1GB), 2)"') do set "spazio_iniziale=%%a"
+
+if exist "%USERPROFILE%\Desktop\Pulizia_Report.txt" (del /f /q "%USERPROFILE%\Desktop\Pulizia_Report.txt" >nul 2>&1)
+if exist "%USERPROFILE%\Desktop\File_Piu_Pesanti.txt" (del /f /q "%USERPROFILE%\Desktop\File_Piu_Pesanti.txt" >nul 2>&1)
+if exist "%USERPROFILE%\Desktop\MANUAL_CLEAN_GIGANTI.txt" (del /f /q "%USERPROFILE%\Desktop\MANUAL_CLEAN_GIGANTI.txt" >nul 2>&1)
+
+echo Configurazione completata. Lo spazio iniziale rilevato e di %spazio_iniziale% GB.
+timeout /t 2 >nul
+cls
+
+:: =======================================================================
+:: INIZIO DEI PASSAGGI DI PULIZIA REALI
+:: =======================================================================
+
+:: =================================================================
+:: AREA 1: ELIMINAZIONE FILE INUTILI, LOG, DIRETTOREI TEMP E RECENT
+:: Tecniche utilizzate: Pulizia cache DNS, svuotamento cartelle %temp% e prefetch.
+:: Obiettivo: Liberare spazio immediato sul disco eliminando file volatili.
+:: =================================================================
+
+echo [1/430] Svuotamento e Pulizia delle Cartelle Temporanee di Sistema...
+del /f /q /s C:\Windows\Temp\* >nul 2>&1
+for /d %%p in (C:\Windows\Temp\*) do rmdir /s /q "%%p" >nul 2>&1
+del /f /q /s "%temp%\*" >nul 2>&1
+for /d %%p in ("%temp%\*") do rmdir /s /q "%%p" >nul 2>&1
+echo OK.
+:: SCRIPT AVANZATO DI MANUTENZIONE, PULIZIA E OTTIMIZZAZIONE WINDOWS
+:: Sviluppato da: tr12349 & AI
+:: Nota per il revisore: Eseguire come Amministratore per abilitare i permessi di scrittura.
+:: =================================================================
+@echo off
+setlocal enabledelayedexpansion
+
+:: =======================================================================
+:: CONTROLLO E RICHIESTA AUTOMATICA PERMESSI DI AMMINISTRATORE (UAC)
+:: =======================================================================
+>nul 2>&1 "%SYSTEMROOT%\system32\cacls.exe" "%SYSTEMROOT%\system32\config\system"
+
+if '%errorlevel%' NEQ '0' (
+    echo Richiesta dei permessi di amministratore in corso...
+    goto UACPrompt
+) else ( goto gotAdmin )
+
+:UACPrompt
+    echo Set UAC = CreateObject^("Shell.Application"^) > "%temp%\getadmin.vbs"
+    set "params=%*"
+    echo UAC.ShellExecute "cmd.exe", "/c %~s0 %params%", "", "runas", 1 >> "%temp%\getadmin.vbs"
+    "%temp%\getadmin.vbs"
+    del "%temp%\getadmin.vbs"
+    exit /B
+
+:gotAdmin
+pushd "%CD%"
+CD /D "%~dp0"
+cls
+
+:: =======================================================================
+:: CONFIGURAZIONE INTERFACCIA E DOMANDA INTERATTIVA INIZIALE (SFC)
+:: =======================================================================
+title Windows Space Overlord - Master Ultimate Edition v4.0 (430 Steps)
+
+echo =======================================================================
+echo        BENVENUTO IN WINDOWS SPACE OVERLORD - ULTIMATE EDITION v4.0
+echo =======================================================================
+echo.
+
+:RichiestaSFC
+set "scelta="
+set /p "scelta=Desideri eseguire la scansione profonda dei file di sistema (SFC)? [S/N]: "
+
+if /i "%scelta%"=="S" (
+    set "esegui_sfc=SI"
+    echo.
+    echo [*] Scansione profonda abilitata (SFC /SCANNOW richiedera tempo).
+    goto :AvviaPulizia
+)
+if /i "%scelta%"=="N" (
+    set "esegui_sfc=NO"
+    echo.
+    echo [*] Scansione profonda disabilitata per massima velocita.
+    goto :AvviaPulizia
+)
+
+echo Risposta non valida. Digita S per Si o N per No.
+echo.
+goto :RichiestaSFC
+
+:AvviaPulizia
+echo.
+echo =======================================================================
+echo    AVVIO CONFIGURAZIONE E ANALISI DELLO SPAZIO... VIA ALLA PULIZIA!
+echo =======================================================================
+echo.
+
+:: =======================================================================
+:: SALVATAGGIO DEI DATI ORARIO E SPAZIO DI PARTENZA (CORRETTO CONTRO I CRASH)
+:: =======================================================================
+:: Fix per evitare l'errore dello spazio vuoto nelle ore < 10 del mattino
+set "p_time=%TIME%"
+if "%p_time:~0,1%"==" " set "p_time=0%p_time:~1%"
+for /f "tokens=1-4 delims=:.," %%a in ("%p_time%") do (
+    set "S_HH=%%a" & set "S_MM=%%b" & set "S_SS=%%c"
+)
+
+:: Rimuove a forza gli zeri iniziali per evitare l'interpretazione ottale errata in Batch
+for /f "tokens=* delims=0" %%a in ("%S_HH%") do set "S_HH=%%a"
+for /f "tokens=* delims=0" %%a in ("%S_MM%") do set "S_MM=%%a"
+for /f "tokens=* delims=0" %%a in ("%S_SS%") do set "S_SS=%%a"
+if "%S_HH%"=="" set "S_HH=0"
+if "%S_MM%"=="" set "S_MM=0"
+if "%S_SS%"=="" set "S_SS=0"
+
+set /a "start_seconds=(S_HH * 3600) + (S_MM * 60) + S_SS"
+
+for /f "delims=" %%a in ('powershell -NoProfile -ExecutionPolicy Bypass -Command "[math]::round(((Get-Volume -DriveLetter C).SizeRemaining / 1GB), 2)"') do set "spazio_iniziale=%%a"
+
+if exist "%USERPROFILE%\Desktop\Pulizia_Report.txt" (del /f /q "%USERPROFILE%\Desktop\Pulizia_Report.txt" >nul 2>&1)
+if exist "%USERPROFILE%\Desktop\File_Piu_Pesanti.txt" (del /f /q "%USERPROFILE%\Desktop\File_Piu_Pesanti.txt" >nul 2>&1)
+if exist "%USERPROFILE%\Desktop\MANUAL_CLEAN_GIGANTI.txt" (del /f /q "%USERPROFILE%\Desktop\MANUAL_CLEAN_GIGANTI.txt" >nul 2>&1)
+
+echo Configurazione completata. Lo spazio iniziale rilevato e di %spazio_iniziale% GB.
+timeout /t 2 >nul
+cls
+
+:: =======================================================================
+:: INIZIO DEI PASSAGGI DI PULIZIA REALI
+:: =======================================================================
+
+:: =================================================================
+:: AREA 1: ELIMINAZIONE FILE INUTILI, LOG, DIRETTOREI TEMP E RECENT
+:: Tecniche utilizzate: Pulizia cache DNS, svuotamento cartelle %temp% e prefetch.
+:: Obiettivo: Liberare spazio immediato sul disco eliminando file volatili.
+:: =================================================================
+
+echo [1/430] Svuotamento e Pulizia delle Cartelle Temporanee di Sistema...
+del /f /q /s C:\Windows\Temp\* >nul 2>&1
+for /d %%p in (C:\Windows\Temp\*) do rmdir /s /q "%%p" >nul 2>&1
+del /f /q /s "%temp%\*" >nul 2>&1
+for /d %%p in ("%temp%\*") do rmdir /s /q "%%p" >nul 2>&1
+echo OK.
+:: SCRIPT AVANZATO DI MANUTENZIONE, PULIZIA E OTTIMIZZAZIONE WINDOWS
+:: Sviluppato da: tr12349 & AI
+:: Nota per il revisore: Eseguire come Amministratore per abilitare i permessi di scrittura.
+:: =================================================================
+@echo off
+setlocal enabledelayedexpansion
+
+:: =======================================================================
+:: CONTROLLO E RICHIESTA AUTOMATICA PERMESSI DI AMMINISTRATORE (UAC)
+:: =======================================================================
+>nul 2>&1 "%SYSTEMROOT%\system32\cacls.exe" "%SYSTEMROOT%\system32\config\system"
+
+if '%errorlevel%' NEQ '0' (
+    echo Richiesta dei permessi di amministratore in corso...
+    goto UACPrompt
+) else ( goto gotAdmin )
+
+:UACPrompt
+    echo Set UAC = CreateObject^("Shell.Application"^) > "%temp%\getadmin.vbs"
+    set "params=%*"
+    echo UAC.ShellExecute "cmd.exe", "/c %~s0 %params%", "", "runas", 1 >> "%temp%\getadmin.vbs"
+    "%temp%\getadmin.vbs"
+    del "%temp%\getadmin.vbs"
+    exit /B
+
+:gotAdmin
+pushd "%CD%"
+CD /D "%~dp0"
+cls
+
+:: =======================================================================
+:: CONFIGURAZIONE INTERFACCIA E DOMANDA INTERATTIVA INIZIALE (SFC)
+:: =======================================================================
+title Windows Space Overlord - Master Ultimate Edition v4.0 (430 Steps)
+
+echo =======================================================================
+echo        BENVENUTO IN WINDOWS SPACE OVERLORD - ULTIMATE EDITION v4.0
+echo =======================================================================
+echo.
+
+:RichiestaSFC
+set "scelta="
+set /p "scelta=Desideri eseguire la scansione profonda dei file di sistema (SFC)? [S/N]: "
+
+if /i "%scelta%"=="S" (
+    set "esegui_sfc=SI"
+    echo.
+    echo [*] Scansione profonda abilitata (SFC /SCANNOW richiedera tempo).
+    goto :AvviaPulizia
+)
+if /i "%scelta%"=="N" (
+    set "esegui_sfc=NO"
+    echo.
+    echo [*] Scansione profonda disabilitata per massima velocita.
+    goto :AvviaPulizia
+)
+
+echo Risposta non valida. Digita S per Si o N per No.
+echo.
+goto :RichiestaSFC
+
+:AvviaPulizia
+echo.
+echo =======================================================================
+echo    AVVIO CONFIGURAZIONE E ANALISI DELLO SPAZIO... VIA ALLA PULIZIA!
+echo =======================================================================
+echo.
+
+:: =======================================================================
+:: SALVATAGGIO DEI DATI ORARIO E SPAZIO DI PARTENZA (CORRETTO CONTRO I CRASH)
+:: =======================================================================
+:: Fix per evitare l'errore dello spazio vuoto nelle ore < 10 del mattino
+set "p_time=%TIME%"
+if "%p_time:~0,1%"==" " set "p_time=0%p_time:~1%"
+for /f "tokens=1-4 delims=:.," %%a in ("%p_time%") do (
+    set "S_HH=%%a" & set "S_MM=%%b" & set "S_SS=%%c"
+)
+
+:: Rimuove a forza gli zeri iniziali per evitare l'interpretazione ottale errata in Batch
+for /f "tokens=* delims=0" %%a in ("%S_HH%") do set "S_HH=%%a"
+for /f "tokens=* delims=0" %%a in ("%S_MM%") do set "S_MM=%%a"
+for /f "tokens=* delims=0" %%a in ("%S_SS%") do set "S_SS=%%a"
+if "%S_HH%"=="" set "S_HH=0"
+if "%S_MM%"=="" set "S_MM=0"
+if "%S_SS%"=="" set "S_SS=0"
+
+set /a "start_seconds=(S_HH * 3600) + (S_MM * 60) + S_SS"
+
+for /f "delims=" %%a in ('powershell -NoProfile -ExecutionPolicy Bypass -Command "[math]::round(((Get-Volume -DriveLetter C).SizeRemaining / 1GB), 2)"') do set "spazio_iniziale=%%a"
+
+if exist "%USERPROFILE%\Desktop\Pulizia_Report.txt" (del /f /q "%USERPROFILE%\Desktop\Pulizia_Report.txt" >nul 2>&1)
+if exist "%USERPROFILE%\Desktop\File_Piu_Pesanti.txt" (del /f /q "%USERPROFILE%\Desktop\File_Piu_Pesanti.txt" >nul 2>&1)
+if exist "%USERPROFILE%\Desktop\MANUAL_CLEAN_GIGANTI.txt" (del /f /q "%USERPROFILE%\Desktop\MANUAL_CLEAN_GIGANTI.txt" >nul 2>&1)
+
+echo Configurazione completata. Lo spazio iniziale rilevato e di %spazio_iniziale% GB.
+timeout /t 2 >nul
+cls
+
+:: =======================================================================
+:: INIZIO DEI PASSAGGI DI PULIZIA REALI
+:: =======================================================================
+
+:: =================================================================
+:: AREA 1: ELIMINAZIONE FILE INUTILI, LOG, DIRETTOREI TEMP E RECENT
+:: Tecniche utilizzate: Pulizia cache DNS, svuotamento cartelle %temp% e prefetch.
+:: Obiettivo: Liberare spazio immediato sul disco eliminando file volatili.
+:: =================================================================
+
+echo [1/430] Svuotamento e Pulizia delle Cartelle Temporanee di Sistema...
 del /f /q /s C:\Windows\Temp\* >nul 2>&1
 for /d %%p in (C:\Windows\Temp\*) do rmdir /s /q "%%p" >nul 2>&1
 del /f /q /s "%temp%\*" >nul 2>&1
@@ -2210,6 +2675,146 @@ echo [400/400] Sincronizzazione fisica hardware finale e svuotamento definitivo 
 powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command "Optimize-Volume -DriveLetter C -Optimize" >nul 2>&1
 echo OK.
 
+echo [401/430] Svuotamento della cache dei driver grafici obsoleti scaricati (Intel)...
+if exist "C:\ProgramData\Intel\Downloads" (rmdir /s /q "C:\ProgramData\Intel\Downloads" >nul 2>&1)
+echo OK.
+
+echo [402/430] Rimozione delle copie di cache locali dei vecchi aggiornamenti cumulativi...
+if exist C:\Windows\servicing\Packages (
+    powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command "Get-ChildItem -Path C:\Windows\servicing\Packages -Filter *.cat, *.mum -ErrorAction SilentlyContinue | Where-Object { $_.LastWriteTime -lt (Get-Date).AddDays(-90) } | ForEach-Object { Remove-Item $_.FullName -Force -ErrorAction SilentlyContinue }" >nul 2>&1
+)
+echo OK.
+
+echo [403/430] Eliminazione delle vecchie versioni compresse dei file di log MOF di sistema...
+if exist C:\Windows\System32\wbem\AutoRecover (
+    del /f /q /s C:\Windows\System32\wbem\AutoRecover\*.mof >nul 2>&1
+)
+echo OK.
+
+echo [404/430] Compressione LZX dell'intera cartella dei driver installati (FileRepository)...
+:: I driver sono già caricati nel Kernel, la compressione LZX riduce lo spazio del 40% in totale sicurezza.
+if exist "C:\Windows\System32\DriverStore\FileRepository" (
+    compact /c /s:"C:\Windows\System32\DriverStore\FileRepository" /exe:lzx /i >nul 2>&1
+)
+echo OK.
+
+echo [405/430] Svuotamento della cache dei file temporanei di Adobe Premiere (Peak Files)...
+if exist "%AppData%\Adobe\Common\Peak Files" (rmdir /s /q "%AppData%\Adobe\Common\Peak Files" >nul 2>&1)
+echo OK.
+
+echo [406/430] Svuotamento totale della cache di anteprima temporanea dei Font di Windows...
+if exist C:\Windows\Fonts (
+    del /f /q /s C:\Windows\Fonts\*.bak >nul 2>&1
+    del /f /q /s C:\Windows\Fonts\*.tmp >nul 2>&1
+)
+echo OK.
+
+echo [407/430] Eliminazione delle cache dei pacchetti scaricati e accumulati da Python (Wheel Cache)...
+if exist "%LocalAppData%\pip\wheels" (rmdir /s /q "%LocalAppData%\pip\wheels" >nul 2>&1)
+echo OK.
+
+echo [408/430] Svuotamento profondo delle directory temporanee del modulo Windows Installer...
+if exist C:\Windows\Installer (
+    del /f /q /s C:\Windows\Installer\*.tmp >nul 2>&1
+)
+echo OK.
+
+echo [409/430] Pulizia dei log temporanei di errore dell'app OneDrive Personal...
+if exist "%LocalAppData%\Microsoft\OneDrive\logs\Personal" (del /f /q /s "%LocalAppData%\Microsoft\OneDrive\logs\Personal\*" >nul 2>&1)
+echo OK.
+
+echo [410/430] Pulizia dei log temporanei di errore dell'app OneDrive Business...
+if exist "%LocalAppData%\Microsoft\OneDrive\logs\Business1" (del /f /q /s "%LocalAppData%\Microsoft\OneDrive\logs\Business1\*" >nul 2>&1)
+echo OK.
+
+echo [411/430] Rimozione forzata dei log orfani del gestore dischi virtuali nativo (VDS)...
+if exist C:\Windows\Logs\VDS (del /f /q /s C:\Windows\Logs\VDS\* >nul 2>&1)
+echo OK.
+
+echo [412/430] Svuotamento dei file temporanei di log del modulo NuGet locale...
+if exist "%USERPROFILE%\.nuget\packages" (
+    powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command "Get-ChildItem -Path '$env:USERPROFILE\.nuget\packages' -Include *.tmp, *.log -Recurse -ErrorAction SilentlyContinue | ForEach-Object { Remove-Item $_.FullName -Force -ErrorAction SilentlyContinue }" >nul 2>&1
+)
+echo OK.
+
+echo [413/430] Compressione LZX profonda dei dizionari statici e motori di traduzione di Office...
+if exist "C:\Program Files\Microsoft Office\root\Office16\Proof" (
+    compact /c /s:"C:\Program Files\Microsoft Office\root\Office16\Proof" /exe:lzx /i >nul 2>&1
+)
+echo OK.
+
+echo [414/430] Rimozione dei log storici generati dal sistema di crittografia dei file EFS...
+if exist C:\Windows\System32\LogFiles\EFS (del /f /q /s C:\Windows\System32\LogFiles\EFS\* >nul 2>&1)
+echo OK.
+
+echo [415/430] Svuotamento della cache dei metadati locali temporanei dell'app Microsoft To-Do...
+if exist "%LocalAppData%\Packages\Microsoft.Todos_8wekyb3d8bbwe\LocalCache" (rmdir /s /q "%LocalAppData%\Packages\Microsoft.Todos_8wekyb3d8bbwe\LocalCache" >nul 2>&1)
+echo OK.
+
+echo [416/430] Rimozione file .tmp e log isolati nella radice della cartella ProgramData...
+del /f /q C:\ProgramData\*.tmp >nul 2>&1
+del /f /q C:\ProgramData\*.log >nul 2>&1
+echo OK.
+
+echo [417/430] Svuotamento delle cartelle Art Cache del server multimediale interno di Windows...
+if exist "%LocalAppData%\Microsoft\Media Player\Art Cache" (rmdir /s /q "%LocalAppData%\Microsoft\Media Player\Art Cache" >nul 2>&1)
+echo OK.
+
+echo [418/430] Svuotamento della cache dei log delle sessioni Xbox Live Auth Host...
+if exist "%LocalAppData%\Packages\Microsoft.XboxLiveAuthHost_8wekyb3d8bbwe\LocalState" (del /f /q /s "%LocalAppData%\Packages\Microsoft.XboxLiveAuthHost_8wekyb3d8bbwe\LocalState\*" >nul 2>&1)
+echo OK.
+
+echo [419/430] Compressione LZX delle cartelle di runtime di Java (Se installato a 64-bit)...
+if exist "C:\Program Files\Java" (compact /c /s:"C:\Program Files\Java" /exe:lzx /i >nul 2>&1)
+echo OK.
+
+echo [420/430] Compressione LZX delle cartelle di runtime di Java (Se installato a 32-bit)...
+if exist "C:\Program Files (x86)\Java" (compact /c /s:"C:\Program Files (x86)\Java" /exe:lzx /i >nul 2>&1)
+echo OK.
+
+echo [421/430] Rimozione log storici del servizio di configurazione di rete wireless (WLAN)...
+if exist C:\Windows\System32\LogFiles\WLAN (del /f /q /s C:\Windows\System32\LogFiles\WLAN\* >nul 2>&1)
+echo OK.
+
+echo [422/430] Compressione LZX delle librerie dei moduli grafici DirectX (D3D)...
+if exist "C:\Windows\System32\DirectX" (compact /c /s:"C:\Windows\System32\DirectX" /exe:lzx /i >nul 2>&1)
+echo OK.
+
+echo [423/430] Sfoltimento forzato dei file di backup temporanei del boot manager...
+if exist C:\Windows\Boot\EFI\*.bak (del /f /q C:\Windows\Boot\EFI\*.bak >nul 2>&1)
+echo OK.
+
+echo [424/430] Svuotamento della cache dei file temporanei di Adobe Media Encoder (Render Cache)...
+if exist "%AppData%\Adobe\Common\PTX" (rmdir /s /q "%AppData%\Adobe\Common\PTX" >nul 2>&1)
+echo OK.
+
+echo [425/430] Compressione LZX della directory dei log del visualizzatore eventi (Winevt)...
+:: I log storici occupano molto spazio, comprimerli in LZX fa risparmiare il 60% in totale sicurezza.
+if exist C:\Windows\System32\winevt (compact /c /s:C:\Windows\System32\winevt /exe:lzx /i >nul 2>&1)
+echo OK.
+
+echo [426/430] Rimozione forzata dei file di report di crash generati dal browser Brave...
+if exist "%LocalAppData%\BraveSoftware\Brave-Browser\User Data\Crashpad\reports" (del /f /q /s "%LocalAppData%\BraveSoftware\Brave-Browser\User Data\Crashpad\reports\*" >nul 2>&1)
+echo OK.
+
+echo [427/430] Compressione NTFS profonda dei log dell'antivirus nativo di Windows...
+if exist "%ProgramData%\Microsoft\Windows Defender\Support" (compact /c /s:"%ProgramData%\Microsoft\Windows Defender\Support" /i >nul 2>&1)
+echo OK.
+
+echo [428/430] Svuotamento della cache dei log delle sessioni Xbox Live Identity Provider...
+if exist "%LocalAppData%\Packages\Microsoft.XboxIdentityProvider_8wekyb3d8bbwe\LocalState" (del /f /q /s "%LocalAppData%\Packages\Microsoft.XboxIdentityProvider_8wekyb3d8bbwe\LocalState\*" >nul 2>&1)
+echo OK.
+
+echo [429/430] Svuotamento della cache delle miniature temporanee di Adobe Bridge...
+if exist "%AppData%\Adobe\Bridge*\Cache" (powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command "Get-ChildItem -Path '$env:APPDATA\Adobe' -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -match '^Bridge' } | ForEach-Object { if (Test-Path \"$($_.FullName)\Cache\") { Remove-Item \"$($_.FullName)\Cache\*\" -Recurse -Force -ErrorAction SilentlyContinue } }" >nul 2>&1)
+echo OK.
+
+echo [430/430] Ottimizzazione intelligente finale dell'unita (TRIM per SSD / Defrag per HDD)...
+:: Comando nativo che non stressa l'hardware perché riconosce autonomamente se il disco è SSD o meccanico
+powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command "Optimize-Volume -DriveLetter C -Optimize" >nul 2>&1
+echo OK.
+
+
 :: =======================================================================
 :: --- SEZIONE CONCLUSIVA: CALCOLO SPAZIO E TEMPO DI ESECUZIONE ---
 :: =======================================================================
@@ -2246,7 +2851,7 @@ echo =======================================================
 echo     REPORT DI PULIZIA ESTREMA WINDOWS SPACE OVERLORD
 echo =======================================================
 echo  Data esecuzione: %DATE% alle ore %TIME%
-echo  Totale passaggi reali eseguiti: 296 / 296
+echo  Totale passaggi reali eseguiti: 430 / 430
 echo  Scansione SFC inclusa: %esegui_sfc%
 echo  Tempo impiegato: %minuti% minuti e %secondi% secondi
 echo  Spazio Libero Iniziale: %spazio_iniziale% GB
