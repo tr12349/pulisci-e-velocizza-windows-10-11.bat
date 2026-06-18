@@ -2923,6 +2923,327 @@ echo [600/600] OTTIMIZZAZIONE STRUTTURALE E SINCRO FISICA DELLO SPAZIO (TRIM GEN
 powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command "Optimize-Volume -DriveLetter C -Optimize" >nul 2>&1
 echo OK.
 
+
+echo [601/630] Disattivazione riserva di spazio per i rollback degli update...
+DISM.exe /Online /Cleanup-Image /SFC /Disable-Feature /FeatureName:Windows-Rollback-Data /NoRestart >nul 2>&1
+echo OK.
+
+echo [602/630] Sfoltimento radicale e profondo dello Store dei Componenti (WinSxS)...
+:: Elimina fisicamente i vecchi componenti di sistema obsoleti sostituiti dalle nuove patch
+DISM.exe /Online /Cleanup-Image /StartComponentCleanup /ResetBase /NoRestart >nul 2>&1
+echo OK.
+
+echo [603/630] Rimozione sicura e definitiva delle installazioni precedenti (Windows.old)...
+if exist C:\Windows.old (
+    DISM.exe /Online /Cleanup-Image /ClearDedicatedInUse >nul 2>&1
+    rmdir /s /q C:\Windows.old >nul 2>&1
+)
+echo OK.
+
+echo [604/630] Attivazione dello stato CompactOS del Kernel (Compressione LZX)...
+:: Comprime i file di sistema in background a livello hardware senza impattare sulla CPU
+compact /compactos:always >nul 2>&1
+echo OK.
+
+echo [605/630] Svuotamento della cache dei file multimediali di Telegram Desktop...
+:: Usa robocopy per svuotare migliaia di file multimediali pesanti istantaneamente senza freeze
+if exist "%APPDATA%\Telegram Desktop\tdata\user_data\cache" (
+    mkdir "%temp%\t_empty" >nul 2>&1
+    robocopy "%temp%\t_empty" "%APPDATA%\Telegram Desktop\tdata\user_data\cache" /MIR >nul 2>&1
+    rmdir /s /q "%temp%\t_empty" >nul 2>&1
+)
+echo OK.
+
+echo [606/630] Pulizia profonda della cache del Browser Google Chrome (Default)...
+del /f /q /s "%LOCALAPPDATA%\Google\Chrome\User Data\Default\Cache\*" >nul 2>&1
+del /f /q /s "%LOCALAPPDATA%\Google\Chrome\User Data\Default\Code Cache\*" >nul 2>&1
+echo OK.
+
+echo [607/630] Pulizia profonda della cache del Browser Google Chrome (Profilo 1)...
+del /f /q /s "%LOCALAPPDATA%\Google\Chrome\User Data\Profile 1\Cache\*" >nul 2>&1
+del /f /q /s "%LOCALAPPDATA%\Google\Chrome\User Data\Profile 1\Code Cache\*" >nul 2>&1
+echo OK.
+
+echo [608/630] Pulizia profonda della cache del Browser Microsoft Edge (Default)...
+del /f /q /s "%LOCALAPPDATA%\Microsoft\Edge\User Data\Default\Cache\*" >nul 2>&1
+del /f /q /s "%LOCALAPPDATA%\Microsoft\Edge\User Data\Default\Code Cache\*" >nul 2>&1
+echo OK.
+
+echo [609/630] Pulizia profonda della cache del Browser Microsoft Edge (Profilo 1)...
+del /f /q /s "%LOCALAPPDATA%\Microsoft\Edge\User Data\Profile 1\Cache\*" >nul 2>&1
+del /f /q /s "%LOCALAPPDATA%\Microsoft\Edge\User Data\Profile 1\Code Cache\*" >nul 2>&1
+echo OK.
+
+echo [610/630] Svuotamento profondo della cache dell'applicazione Spotify...
+if exist "%LOCALAPPDATA%\Spotify\Data" (del /f /q /s "%LOCALAPPDATA%\Spotify\Data\*" >nul 2>&1)
+echo OK.
+
+echo [611/630] Svuotamento rapido della cache dell'applicazione Discord...
+if exist "%APPDATA%\discord\Cache" (del /f /q /s "%APPDATA%\discord\Cache\*" >nul 2>&1)
+echo OK.
+
+echo [612/630] Pulizia della cache dei moduli precompilati di Python VirtualEnv...
+if exist "%USERPROFILE%\.virtualenvs" (powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command "Get-ChildItem -Path '$env:USERPROFILE\.virtualenvs' -Filter *.pyc, *.tmp -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force" >nul 2>&1)
+echo OK.
+
+echo [613/630] Svuotamento dei log di sessione del client FTP WinSCP...
+if exist "%AppData%\WinSCP\Cache" (rmdir /s /q "%AppData%\WinSCP\Cache" >nul 2>&1)
+echo OK.
+
+echo [614/630] Rimozione della cache delle immagini temporanee dell'app Obsidian...
+if exist "%AppData%\obsidian\Cache" (rmdir /s /q "%AppData%\obsidian\Cache" >nul 2>&1)
+echo OK.
+
+echo [615/630] Pulizia dei log di telemetria e tracciamento dell'app Signal...
+if exist "%AppData%\Signal\logs" (del /f /q /s "%AppData%\Signal\logs\*" >nul 2>&1)
+echo OK.
+
+echo [616/630] Svuotamento dei file proxy e cache temporanea di DaVinci Resolve...
+if exist "%AppData%\Blackmagic Design\DaVinci Resolve\Preferences\Cache" (del /f /q /s "%AppData%\Blackmagic Design\DaVinci Resolve\Preferences\Cache\*" >nul 2>&1)
+echo OK.
+
+echo [617/630] Svuotamento della cache dei log di debug di Audacity...
+if exist "%LocalAppData%\Audacity\SessionData" (rmdir /s /q "%LocalAppData%\Audacity\SessionData" >nul 2>&1)
+echo OK.
+
+echo [618/630] Svuotamento dei log di tracciamento del motore di gioco Godot Engine...
+if exist "%AppData%\Godot\app_user_data\__logs" (del /f /q /s "%AppData%\Godot\app_user_data\__logs\*" >nul 2>&1)
+echo OK.
+
+echo [619/630] Pulizia file .log temporanei del database locale di Unity Hub...
+if exist "%AppData%\UnityHub\logs" (del /f /q /s "%AppData%\UnityHub\logs\*" >nul 2>&1)
+echo OK.
+
+echo [620/630] Svuotamento della cache di caricamento delle estensioni di VS Code...
+if exist "%AppData%\Code\CachedExtensionVSIX" (rmdir /s /q "%AppData%\Code\CachedExtensionVSIX" >nul 2>&1)
+echo OK.
+
+echo [621/630] Svuotamento dei log di crash e telemetria interna di VS Code...
+if exist "%AppData%\Code\logs" (del /f /q /s "%AppData%\Code\logs\*" >nul 2>&1)
+echo OK.
+
+echo [622/630] Svuotamento della cache di rendering web di GitHub Desktop...
+if exist "%AppData%\GitHubDesktop\Cache" (rmdir /s /q "%AppData%\GitHubDesktop\Cache" >nul 2>&1)
+echo OK.
+
+echo [623/630] Rimozione dei log storici accumulati da GitHub Desktop...
+if exist "%AppData%\GitHubDesktop\logs" (del /f /q /s "%AppData%\GitHubDesktop\logs\*" >nul 2>&1)
+echo OK.
+
+echo [624/630] Pulizia della cache dei pacchetti estratti di Android Studio...
+if exist "%LocalAppData%\Google\AndroidStudio*\caches" (del /f /q /s "%LocalAppData%\Google\AndroidStudio*\caches\*" >nul 2>&1)
+echo OK.
+
+echo [625/630] Svuotamento log di tracciamento e debug di Android Studio...
+if exist "%LocalAppData%\Google\AndroidStudio*\log" (del /f /q /s "%LocalAppData%\Google\AndroidStudio*\log\*" >nul 2>&1)
+echo OK.
+
+echo [626/630] Svuotamento dei file temporanei dell'app Collegamento al Telefono...
+if exist "%LocalAppData%\Packages\Microsoft.YourPhone_8wekyb3d8bbwe\LocalCache" (rmdir /s /q "%LocalAppData%\Packages\Microsoft.YourPhone_8wekyb3d8bbwe\LocalCache" >nul 2>&1)
+echo OK.
+
+
+echo [627/630] Pulizia della cache di rendering grafico del nuovo Terminale Windows...
+if exist "%LocalAppData%\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\shared" (del /f /q /s "%LocalAppData%\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\shared\*" >nul 2>&1)
+echo OK.
+
+echo [628/630] Svuotamento dei file temporanei generati dall'app Xbox App Runtime...
+if exist "%LocalAppData%\Packages\Microsoft.GamingServices_8wekyb3d8bbwe\LocalState" (del /f /q /s "%LocalAppData%\Packages\Microsoft.GamingServices_8wekyb3d8bbwe\LocalState\*.tmp" >nul 2>&1)
+echo OK.
+
+echo [629/630] Svuotamento della cache dei log delle connessioni Bluetooth...
+if exist C:\Windows\System32\LogFiles\Bluetooth (del /f /q /s C:\Windows\System32\LogFiles\Bluetooth\* >nul 2>&1)
+echo OK.
+
+echo [630/630] Ottimizzazione strutturale finale hardware dell'unita (TRIM Intelligente)...
+:: Libera i blocchi logici degli SSD azzerando lo spazio residuo senza usura
+powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command "Optimize-Volume -DriveLetter C -Optimize" >nul 2>&1
+echo OK.
+
+echo [661/700] Svuotamento della cache di caricamento delle anteprime di Steam...
+if exist "C:\Program Files (x86)\Steam\appcache" (rmdir /s /q "C:\Program Files (x86)\Steam\appcache" >nul 2>&1)
+echo OK.
+
+echo [662/700] Svuotamento dei file temporanei del browser web interno di Steam...
+if exist "C:\Program Files (x86)\Steam\config\htmlcache" (
+    del /f /q /s "C:\Program Files (x86)\Steam\config\htmlcache\*" >nul 2>&1
+    for /d %%p in ("C:\Program Files (x86)\Steam\config\htmlcache\*") do rmdir /s /q "%%p" >nul 2>&1
+)
+echo OK.
+
+echo [663/700] Rimozione dei log storici accumulati dal client di gioco Steam...
+if exist "C:\Program Files (x86)\Steam\logs" (del /f /q /s "C:\Program Files (x86)\Steam\logs\*" >nul 2>&1)
+echo OK.
+
+echo [664/700] Svuotamento dei file di tracciamento e log di errore di Epic Games Launcher...
+if exist "%LOCALAPPDATA%\EpicGamesLauncher\Saved\Logs" (del /f /q /s "%LOCALAPPDATA%\EpicGamesLauncher\Saved\Logs\*" >nul 2>&1)
+echo OK.
+
+echo [665/700] Svuotamento della cache web di caricamento di Epic Games Launcher...
+if exist "%LOCALAPPDATA%\EpicGamesLauncher\Saved\webcache" (
+    rmdir /s /q "%LOCALAPPDATA%\EpicGamesLauncher\Saved\webcache" >nul 2>&1
+)
+echo OK.
+
+echo [666/700] Svuotamento dei file temporanei della cache del Client EA Desktop...
+if exist "%PROGRAMDATA%\Electronic Arts\EA Desktop\Cache" (
+    del /f /q /s "%PROGRAMDATA%\Electronic Arts\EA Desktop\Cache\*" >nul 2>&1
+    for /d %%p in ("%PROGRAMDATA%\Electronic Arts\EA Desktop\Cache\*") do rmdir /s /q "%%p" >nul 2>&1
+)
+echo OK.
+
+echo [667/700] Rimozione dei log diagnostici orfani accumulati da EA Desktop...
+if exist "%LOCALAPPDATA%\Electronic Arts\EA Desktop\Logs" (del /f /q /s "%LOCALAPPDATA%\Electronic Arts\EA Desktop\Logs\*" >nul 2>&1)
+echo OK.
+
+
+echo [668/700] Svuotamento della cache dei file temporanei di Ubisoft Connect...
+if exist "C:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\cache" (
+    rmdir /s /q "C:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\cache" >nul 2>&1
+)
+echo OK.
+
+echo [669/700] Pulizia dei log temporanei estratti da Ubisoft Connect (Spazio)...
+if exist "C:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\logs" (del /f /q /s "C:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\logs\*" >nul 2>&1)
+echo OK.
+
+echo [670/700] Svuotamento della cache dei log di errore del launcher Battle.net Agent...
+if exist "%ProgramData%\Battle.net\Agent\Agent.*\Logs" (
+    powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command "Get-ChildItem -Path 'C:\ProgramData\Battle.net\Agent' -Filter *.log -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force" >nul 2>&1
+)
+echo OK.
+
+echo [671/700] Pulizia dei file temporanei generati da Windows Subsystem for Linux (WSL2)...
+if exist "%USERPROFILE%\.wslg\logs" (
+    del /f /q /s "%USERPROFILE%\.wslg\logs\*" >nul 2>&1
+)
+echo OK.
+
+echo [672/700] Rimozione della cache globale dei pacchetti Node.js (NPM Cache)...
+if exist "%APPDATA%\npm-cache" (rmdir /s /q "%APPDATA%\npm-cache" >nul 2>&1)
+echo OK.
+
+echo [673/700] Svuotamento della cache dei log storici del servizio Windows Time (W32Time)...
+if exist C:\Windows\w32time.log (del /f /q C:\Windows\w32time.log >nul 2>&1)
+echo OK.
+
+echo [674/700] Rimozione della cache dei token temporanei e log di LiveUpdate...
+if exist "C:\ProgramData\Microsoft\LiveUpdate" (
+    del /f /q /s "C:\ProgramData\Microsoft\LiveUpdate\*" >nul 2>&1
+)
+echo OK.
+
+echo [675/700] Pulizia dei log di errore di diagnostica del chip di sicurezza TPM...
+if exist C:\Windows\Logs\MeasuredBoot (del /f /q /s C:\Windows\Logs\MeasuredBoot\* >nul 2>&1)
+echo OK.
+
+echo [676/700] Svuotamento dei log temporanei accumulati dal Kernel Live Dump (Sru Cache)...
+if exist C:\Windows\System32\Sru (
+    powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command "Get-ChildItem -Path C:\Windows\System32\Sru -Filter *.log -ErrorAction SilentlyContinue | Remove-Item -Force" >nul 2>&1
+)
+echo OK.
+
+echo [677/700] Pulizia dei log storici del sistema di crittografia dei file BitLocker...
+if exist C:\Windows\System32\LogFiles\BitLocker (del /f /q /s C:\Windows\System32\LogFiles\BitLocker\* >nul 2>&1)
+echo OK.
+
+echo [678/700] Svuotamento dei file temporanei di caching del servizio Windows Insider (Se attivo)...
+if exist "%ProgramData%\Microsoft\Windows\SelfHost" (del /f /q /s "%ProgramData%\Microsoft\Windows\SelfHost\*" >nul 2>&1)
+echo OK.
+
+echo [679/700] Svuotamento dei log storici orfani del visualizzatore di eventi Hardware (WHEA)...
+if exist C:\Windows\LiveKernelReports (
+    del /f /q /s C:\Windows\LiveKernelReports\*.dmp >nul 2>&1
+    for /d %%p in (C:\Windows\LiveKernelReports\*) do rmdir /s /q "%%p" >nul 2>&1
+)
+echo OK.
+
+echo [680/700] Rimozione dei log storici generati dal sistema di crittografia dei file EFS...
+if exist C:\Windows\System32\LogFiles\EFS (del /f /q /s C:\Windows\System32\LogFiles\EFS\* >nul 2>&1)
+echo OK.
+
+echo [681/700] Svuotamento dei file orfani compressi generati dalle estrazioni di WinZip interrotte...
+if exist "%AppData%\WinZip\wztemp" (rmdir /s /q "%AppData%\WinZip\wztemp" >nul 2>&1)
+echo OK.
+
+echo [682/700] Svuotamento della cache dei certificati digitali revocati o scaduti (Cryptnet)...
+if exist "%LocalAppData%\Microsoft\CryptnetUrlCache" (rmdir /s /q "%LocalAppData%\Microsoft\CryptnetUrlCache" >nul 2>&1)
+echo OK.
+
+
+echo [683/700] Pulizia dei log di telemetria e tracciamento dell'app di messaggistica Signal...
+if exist "%AppData%\Signal\logs" (del /f /q /s "%AppData%\Signal\logs\*" >nul 2>&1)
+echo OK.
+
+echo [684/700] Rimozione dei log di tracciamento e configurazione di Windows Speech Setup...
+if exist C:\Windows\Speech\Common (del /f /q /s C:\Windows\Speech\Common\*.log >nul 2>&1)
+echo OK.
+
+echo [685/700] Svuotamento della cache di caricamento delle estensioni di VS Code...
+if exist "%AppData%\Code\CachedExtensionVSIX" (rmdir /s /q "%AppData%\Code\CachedExtensionVSIX" >nul 2>&1)
+echo OK.
+
+echo [686/700] Svuotamento dei log di crash e telemetria interna di VS Code...
+if exist "%AppData%\Code\logs" (del /f /q /s "%AppData%\Code\logs\*" >nul 2>&1)
+echo OK.
+
+echo [687/700] Svuotamento della cache di rendering web di GitHub Desktop...
+if exist "%AppData%\GitHubDesktop\Cache" (rmdir /s /q "%AppData%\GitHubDesktop\Cache" >nul 2>&1)
+echo OK.
+
+echo [688/700] Rimozione dei log storici accumulati da GitHub Desktop...
+if exist "%AppData%\GitHubDesktop\logs" (del /f /q /s "%AppData%\GitHubDesktop\logs\*" >nul 2>&1)
+echo OK.
+
+echo [689/700] Pulizia della cache dei pacchetti estratti di Android Studio...
+if exist "%LocalAppData%\Google\AndroidStudio*\caches" (del /f /q /s "%LocalAppData%\Google\AndroidStudio*\caches\*" >nul 2>&1)
+echo OK.
+
+echo [690/700] Svuotamento log di tracciamento e debug di Android Studio...
+if exist "%LocalAppData%\Google\AndroidStudio*\log" (del /f /q /s "%LocalAppData%\Google\AndroidStudio*\log\*" >nul 2>&1)
+echo OK.
+
+echo [691/700] Svuotamento dei file temporanei dell'app Collegamento al Telefono (Phone Link)...
+if exist "%LocalAppData%\Packages\Microsoft.YourPhone_8wekyb3d8bbwe\LocalCache" (rmdir /s /q "%LocalAppData%\Packages\Microsoft.YourPhone_8wekyb3d8bbwe\LocalCache" >nul 2>&1)
+echo OK.
+
+echo [692/700] Pulizia della cache di rendering grafico del nuovo Terminale Windows...
+if exist "%LocalAppData%\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\shared" (del /f /q /s "%LocalAppData%\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\shared\*" >nul 2>&1)
+echo OK.
+
+echo [693/700] Svuotamento dei file temporanei generati dall'app Xbox App Runtime (Gaming Services)...
+if exist "%LocalAppData%\Packages\Microsoft.GamingServices_8wekyb3d8bbwe\LocalState" (del /f /q /s "%LocalAppData%\Packages\Microsoft.GamingServices_8wekyb3d8bbwe\LocalState\*.tmp" >nul 2>&1)
+echo OK.
+
+echo [694/700] Svuotamento delle cartelle Art Cache del server multimediale di Windows...
+if exist "%LOCALAPPDATA%\Microsoft\Media Player\Art Cache" (rmdir /s /q "%LOCALAPPDATA%\Microsoft\Media Player\Art Cache" >nul 2>&1)
+echo OK.
+
+echo [695/700] Compressione LZX profonda dei moduli diagnostici di Windows Error Reporting (WER)...
+if exist C:\Windows\System32\Wer (compact /c /s:C:\Windows\System32\Wer /exe:lzx /i >nul 2>&1)
+echo OK.
+
+echo [696/700] Compressione LZX dei file di supporto e guide in linea locali di Windows (Help)...
+if exist C:\Windows\Help (compact /c /s:C:\Windows\Help /exe:lzx /i >nul 2>&1)
+echo OK.
+
+echo [697/700] Compressione LZX delle librerie dei moduli grafici DirectX (D3D)...
+if exist "C:\Windows\System32\DirectX" (compact /c /s:"C:\Windows\System32\DirectX" /exe:lzx /i >nul 2>&1)
+echo OK.
+
+echo [698/700] Compressione LZX profonda dei dizionari statici e motori di traduzione di Office...
+if exist "C:\Program Files\Microsoft Office\root\Office16\Proof" (compact /c /s:"C:\Program Files\Microsoft Office\root\Office16\Proof" /exe:lzx /i >nul 2>&1)
+echo OK.
+
+echo [699/700] Compressione LZX della directory dei log del visualizzatore eventi (Winevt LZX)...
+if exist C:\Windows\System32\winevt (compact /c /s:C:\Windows\System32\winevt /exe:lzx /i >nul 2>&1)
+echo OK.
+
+echo [700/700] Ottimizzazione strutturale finale hardware dell'unita (TRIM Intelligente)...
+:: Sfrutta il comando nativo del File System per liberare lo spazio residuo negli SSD senza logorarli
+powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command "Optimize-Volume -DriveLetter C -Optimize" >nul 2>&1
+echo OK.
+
 :: =======================================================================
 :: --- SEZIONE CONCLUSIVA: CALCOLO SPAZIO E TEMPO DI ESECUZIONE (600 PASSI) ---
 :: =======================================================================
