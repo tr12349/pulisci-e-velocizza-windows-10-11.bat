@@ -1,20 +1,36 @@
-# Windows Space Overlord - Master Ultimate Edition v4.0
+# ⚡ Pulisci e Velocizza Windows 10 & 11 - Ultimate Edition v4.0
 
-Il tool Batch definitivo, **automatico al 100%** e progettato per spingere le prestazioni di Windows 10 e 11 oltre ogni limite, garantendo la **sicurezza totale del sistema**. 
+Benvenuti nel tool Batch definitivo per la manutenzione, la pulizia profonda e l'ottimizzazione delle prestazioni di Windows 10 e Windows 11. Sviluppato interamente con comandi nativi e script PowerShell ad alta efficienza.
 
-A differenza dei comuni software di pulizia commerciali o a pagamento, questo script esegue **600 passaggi reali e mirati** senza installare processi in background pesanti e senza mettere a rischio i tuoi dati personali.
+---
 
-## Perché è imbattibile?
-- **Sicuro al 100%**: Non tocca chiavi di registro instabili, non cancella i salvataggi dei giochi, non altera le password dei browser e rispetta le protezioni Anti-Tamper di Windows Defender.
-- **Ottimizzazione d'Élite**: Sfrutta gli algoritmi nativi del kernel (come la compressione `CompactOS LZX`) e lo sfoltimento profondo del Component Store (`WinSxS ResetBase`), tecniche che i software commerciali evitano per paura di allungare i tempi di scansione.
-- **Interfaccia Avanzata**: Include una barra di avanzamento grafica dinamica e un feedback acustico armonico nativo al completamento delle operazioni.
+## 🚀 Caratteristiche Principali
 
-## Cosa fa questo script?
-1. **Area Pulizia Cache**: Svuota in modo fulmineo le cache di Chrome, Edge, Brave, Opera GX, Discord, Spotify, Telegram Desktop, OneDrive, Adobe e dei motori di sviluppo (VS Code, Python PIP, NuGet).
-2. **Area Manutenzione Kernel**: Pulisce i log di sistema obsoleti, i file temporanei di Windows Update, le installazioni precedenti (`Windows.old`) e i dump di errore.
-3. **Area Hardware**: Esegue un ciclo di ottimizzazione e rilascio dei buffer NTFS (`TRIM` intelligente per SSD e ottimizzazione per HDD) senza stressare i componenti.
+* **700 Opzioni Uniche**: Una scansione totale e profonda senza alcuna ripetizione di codice.
+* **Sicurezza al 100%**: Lo script elimina solo file spazzatura, log orfani e cache volatili. Non tocca mai i driver attivi, i salvataggi dei giochi o i dati personali.
+* **Massimo Spazio Recuperato**: Rimuove i residui pesanti accumulati da Windows Update, browser, launcher di gioco e applicazioni di terze parti.
+* **Ottimizzazione Hardware**: Avvia in automatico i comandi TRIM per gli SSD e il defrag intelligente per gli Hard Disk meccanici.
 
-## Come eseguirlo
-1. Scarica il file `velocizza e pulisci windows 10-11.cmd`.
-2. Fai clic con il tasto destro sul file e seleziona **"Esegui come Amministratore"**.
-3. Lo script richiederà automaticamente i privilegi UAC e avvierà la pulizia profonda in totale autonomia. Al termine, troverai un report dettagliato sul tuo Desktop!
+---
+
+## 📂 Cosa Viene Pulito?
+
+* 🌐 **Browser**: Cache profonda, Code Cache e file temporanei di Chrome, Edge, Brave, Firefox, Opera e Opera GX.
+* 🎮 **Gaming & Launcher**: Cache shader e registri di crash di Steam, Epic Games, Riot Client, Battle.net, EA Desktop, Ubisoft Connect, Roblox e Minecraft.
+* 📁 **Applicazioni Social**: File temporanei e miniature di Discord, Telegram Desktop, WhatsApp e Zoom.
+* 💻 **Strumenti di Sviluppo**: Cache orfane di Node.js (NPM), Python (Pip), Rust (Cargo), NuGet e Visual Studio Code.
+* ⚙️ **Sistema Windows**: Svuotamento Cestino, file temporanei (%TEMP%), Prefetch, log CBS/DISM, cache dei caratteri e molto altro.
+
+---
+
+## 🛠️ Come si usa
+
+1. **Scarica il file** `velocizza e pulisci windows 10-11.cmd` da questo repository.
+2. Fai clic con il **tasto destro** sul file scaricato.
+3. Seleziona **"Esegui come Amministratore"** (necessario per consentire l'esecuzione dei comandi di manutenzione del Kernel).
+4. Attendi il completamento delle 700 opzioni e goditi un PC pulito e scattante!
+
+---
+
+## 📈 Note di Sviluppo
+Il progetto è stato revisionato, testato e ottimizzato riga per riga per garantire l'assenza di errori di sintassi e la massima stabilità su qualsiasi configurazione hardware.
