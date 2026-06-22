@@ -5,13 +5,16 @@
 @echo off
 setlocal enabledelayedexpansion
 
+:: Abilita il supporto nativo ai colori ANSI nel prompt di Windows
+reg add "HKCU\Console" /v VirtualTerminalLevel /t REG_DWORD /d 1 /f >nul 2>&1
+
 :: =======================================================================
 :: CONTROLLO E RICHIESTA AUTOMATICA PERMESSI DI AMMINISTRATORE (UAC)
 :: =======================================================================
 >nul 2>&1 "%SYSTEMROOT%\system32\cacls.exe" "%SYSTEMROOT%\system32\config\system"
 
 if '%errorlevel%' NEQ '0' (
-    echo Richiesta dei permessi di amministratore in corso...
+    echo [96m[INFO] Richiesta dei permessi di amministratore in corso...[0m
     goto UACPrompt
 ) else ( goto gotAdmin )
 
@@ -31,26 +34,30 @@ cls
 :: =======================================================================
 :: CONFIGURAZIONE INTERFACCIA ED ESECUZIONE AUTOMATICA (NO INPUT)
 :: =======================================================================
-title Windows Space Overlord - Master Ultimate Edition v4.0 (500 Steps)
+title Windows Space Overlord - Master Ultimate Edition v4.0 (700 Steps)
 
-echo =======================================================================
-echo        BENVENUTO IN WINDOWS SPACE OVERLORD - ULTIMATE EDITION v4.0
-echo =======================================================================
+echo [92m=======================================================================[0m
+echo [92m       _      _           _                                            [0m
+echo [92m      / \    / \  _ _____/ \____ _ ___ _ _   _ ____ ____  _ ____ ____  [0m
+echo [92m     /   \  /   \/ / ___/_  __ / //  // / \ / /_  _// __ \/ / __// __ \ [0m
+echo [92m    / / \ \/ / / / \__ \  / /  / // _// / \ V /  / / / / / / / _// /_/ / [0m
+echo [92m   /_/   \__/ /_/ /____/ /_/  /_/ \__/_/_/ \_/  /_/ /_/ /_/_/_/  \____/  [0m
+echo [92m                                                                       [0m
+echo [92m       BENVENUTO IN WINDOWS SPACE OVERLORD - ULTIMATE EDITION v4.0     [0m
+echo [92m=======================================================================[0m
 echo.
-echo [*] Configurazione automatica: Scansione profonda SFC ABILITATA.
+echo [96m[*] Configurazione automatica: Scansione profonda SFC ABILITATA.[0m
 set "esegui_sfc=SI"
 echo.
 
-echo =======================================================================
-echo    AVVIO CONFIGURAZIONE E ANALISI DELLO SPAZIO... VIA ALLA PULIZIA!
-echo =======================================================================
+echo [93m=======================================================================[0m
+echo [93m   AVVIO CONFIGURAZIONE E ANALISI DELLO SPAZIO... VIA ALLA PULIZIA!    [0m
+echo [93m=======================================================================[0m
 echo.
 
 :: =======================================================================
 :: SALVATAGGIO DATI ORARIO E SPAZIO (METODO FLUIDO SENZA INTERRUZIONI)
 :: =======================================================================
-:: Cattura lo spazio e il tempo totale in secondi tramite una chiamata esterna sicura
-:: Questo evita al 100% il crash dello spazio vuoto o dello zero iniziale (errore ottale)
 for /f "tokens=1,2 delims=," %%a in ('powershell -NoProfile -ExecutionPolicy Bypass -Command "$time=[DateTime]::Now; $seconds=($time.Hour * 3600) + ($time.Minute * 60) + $time.Second; $space=[math]::round(((Get-Volume -DriveLetter C).SizeRemaining / 1GB), 2); Write-Output \"$seconds,$space\""') do (
     set "start_seconds=%%a"
     set "spazio_iniziale=%%b"
@@ -60,8 +67,11 @@ for /f "tokens=1,2 delims=," %%a in ('powershell -NoProfile -ExecutionPolicy Byp
 if exist "%USERPROFILE%\Desktop\Pulizia_Report.txt" (del /f /q "%USERPROFILE%\Desktop\Pulizia_Report.txt" >nul 2>&1)
 if exist "%USERPROFILE%\Desktop\File_Piu_Pesanti.txt" (del /f /q "%USERPROFILE%\Desktop\File_Piu_Pesanti.txt" >nul 2>&1)
 
-echo Configurazione completata. Lo spazio iniziale rilevato e di %spazio_iniziale% GB.
-timeout /t 2 >nul
+echo [92m[PRONTO] Configurazione completata.[0m 
+echo [96m[INFO] Spazio iniziale rilevato sul disco C: [93m%spazio_iniziale% GB[0m.
+echo.
+echo [91m[ATTENZIONE] Non chiudere questa finestra fino al completamento totale.[0m
+timeout /t 3 >nul
 cls
 
 :: =======================================================================
