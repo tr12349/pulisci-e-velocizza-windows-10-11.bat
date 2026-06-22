@@ -3562,12 +3562,12 @@ if exist "%LOCALAPPDATA%\Google\Chrome\User Data\Default\GCM Store\Encryption" (
 )
 echo OK.
 
-echo [647/700] Svuotamento dei file temporanei della cache delle icone dell'applicazione desktop di Discord (Guilds Shared)...
-if exist "%APPDATA%\discord\Local Storage\leveldb" (
-    del /f /q /s "%APPDATA%\discord\Local Storage\leveldb\*.log" >nul 2>&1
-    del /f /q /s "%APPDATA%\discord\Local Storage\leveldb\*.tmp" >nul 2>&1
+echo [647/706] Pulizia dei log e file di caching di Microsoft Office Desktop App...
+if exist "%LocalAppData%\Packages\Microsoft.MicrosoftOfficeHub_8wekyb3d8bbwe\LocalCache" (
+    rmdir /s /q "%LocalAppData%\Packages\Microsoft.MicrosoftOfficeHub_8wekyb3d8bbwe\LocalCache" >nul 2>&1
 )
 echo OK.
+
 
 echo [648/700] Rimozione forzata dei vecchi file di log temporanei del browser Microsoft Edge (Log-Reporting)...
 if exist "%LOCALAPPDATA%\Microsoft\Edge\User Data\Crashpad\reports" (
