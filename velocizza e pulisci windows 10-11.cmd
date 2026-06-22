@@ -2683,9 +2683,9 @@ if exist "%APPDATA%\discord\logs" (
 )
 echo OK.
 
-echo [500/700] Eliminazione dei file temporanei e dei registri di crash del browser Mozilla Firefox...
-if exist "%APPDATA%\Mozilla\Firefox\Crash Reports" (
-    rmdir /s /q "%APPDATA%\Mozilla\Firefox\Crash Reports" >nul 2>&1
+echo [500/706] Rimozione dei log temporanei e della cache di sincronizzazione di OneDrive...
+if exist "%LocalAppData%\Microsoft\OneDrive\setup\logs" (
+    del /f /q /s "%LocalAppData%\Microsoft\OneDrive\setup\logs\*" >nul 2>&1
 )
 echo OK.
 
@@ -3414,10 +3414,8 @@ if exist "%LOCALAPPDATA%\Riot Games\Riot Client\Logs\RiotClientPrivate" (
 )
 echo OK.
 
-echo [622/700] Svuotamento della cache delle emoji e delle reazioni animate di Discord...
-if exist "%APPDATA%\discord\Cache\Cache_Data" (
-    powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command "Get-ChildItem -Path '$env:APPDATA\discord\Cache\Cache_Data' -Filter 'f_*' -ErrorAction SilentlyContinue | Remove-Item -Force" >nul 2>&1
-)
+echo [622/706] Sfoltimento dei file di log temporanei del framework .NET (Ngen)...
+del /f /q /s C:\Windows\Microsoft.NET\Framework*\*\*.log >nul 2>&1
 echo OK.
 
 echo [623/700] Pulizia forzata dei log delle transazioni e installazioni di moduli di Steam (SteamChina)...
@@ -3883,36 +3881,66 @@ if exist "C:\Windows\System32\LogFiles\WMI\WlanLegacy" (
 )
 echo OK.
 
-echo [700/700] Ottimizzazione finale strutturale ed espulsione forzata di tutti i file di log temporanei pendenti...
-fsutil resource setautoreset true C:\ >nul 2>&1
+echo [700/706] Svuotamento dei file dump di errore delle app di terze parti (CrashDumps)...
+if exist "%LocalAppData%\CrashDumps" (
+    del /f /q /s "%LocalAppData%\CrashDumps\*" >nul 2>&1
+)
 echo OK.
 
-:: =======================================================================
-:: --- SEZIONE CONCLUSIVA: CALCOLO SPAZIO E TEMPO DI ESECUZIONE (700 PASSI) ---
-:: =======================================================================
-echo.
-echo Elaborazione del report finale in corso...
-echo.
+echo [701/706] Azzeramento totale e forzato delle Copie Shadow dei Volumi (VSS)...
+vssadmin delete shadows /all /quiet >nul 2>&1
+echo OK.
 
-for /f "tokens=1,2 delims=," %%a in ('powershell -NoProfile -ExecutionPolicy Bypass -Command "$time=[DateTime]::Now; $seconds=($time.Hour * 3600) + ($time.Minute * 60) + $time.Second; $space=[math]::round(((Get-Volume -DriveLetter C).SizeRemaining / 1GB), 2); Write-Output \"$seconds,$space\""') do (
-    set "end_seconds=%%a"
-    set "spazio_finale=%%b"
+echo [702/706] Rimozione forzata del file di Ibernazione (Eliminazione hiberfil.sys)...
+powercfg /h off >nul 2>&1
+echo OK.
+
+echo [703/706] Sfoltimento radicale del Database degli Indici di Ricerca (Search)...
+net stop wsearch >nul 2>&1
+reg add "HKLM\SOFTWARE\Microsoft\Windows Search" /v SetupCompletedSuccessfully /t REG_DWORD /d 0 /f >nul 2>&1
+if exist "%ProgramData%\Microsoft\Search\Data\Applications\Windows\Windows.edb" (del /f /q /s "%ProgramData%\Microsoft\Search\Data\Applications\Windows\Windows.edb" >nul 2>&1)
+net start wsearch >nul 2>&1
+echo OK.
+
+echo [704/706] Consolidamento definitivo del sistema operativo (DISM ResetBase)...
+DISM.exe /Online /Cleanup-Image /StartComponentCleanup /ResetBase >nul 2>&1
+echo OK.
+
+echo [705/706] Attivazione compressione estrema dei file di sistema (LZX)...
+compact /compactos:always /exe:lzx >nul 2>&1
+echo OK.
+
+echo [706/706] Disattivazione della Riserva di Spazio per Windows Update...
+reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\ReserveManager" /v ShippedWithReserves /t REG_DWORD /d 0 /f >nul 2>&1
+echo OK.
+
+:: Calcola il tempo finale impiegato gestendo i numeri ottali ed eventuali spazi vuoti
+for /f "tokens=1-4 delims=:.," %%a in ("%TIME%") do (
+    set "E_HH=%%a" & set "E_MM=%%b" & set "E_SS=%%c"
 )
+set "E_HH=%E_HH: =%"
+if %E_HH% LSS 10 (set /a E_HH=1%E_HH% - 100)
+if %E_MM% LSS 10 (set /a E_MM=1%E_MM% - 100)
+if %E_SS% LSS 10 (set /a E_SS=1%E_SS% - 100)
+set /a "end_seconds=(E_HH * 3600) + (E_MM * 60) + E_SS"
 
+:: Gestisce il superamento della mezzanotte
 set /a "tempo_impiegato_secondi=end_seconds - start_seconds"
 if %tempo_impiegato_secondi% LSS 0 (set /a "tempo_impiegato_secondi+=86400")
 
 set /a "minuti=tempo_impiegato_secondi / 60"
 set /a "secondi=tempo_impiegato_secondi %% 60"
 
-for /f "delims=" %%a in ('powershell -NoProfile -ExecutionPolicy Bypass -Command "$init='%spazio_iniziale%'.Replace(',','.'); $fin='%spazio_finale%'.Replace(',','.'); $res = [math]::round(([double]$fin - [double]$init), 2); if ($res -lt 0) { 0 } else { $res }"') do set "spazio_guadagnato=%%a"
+:: Calcola lo spazio libero finale e definisce il guadagno netto
+for /f "delims=" %%a in ('powershell -NoProfile -ExecutionPolicy Bypass -Command "[math]::round(((Get-Volume -DriveLetter C).SizeRemaining / 1GB), 2)"') do set "spazio_finale=%%a"
+for /f "delims=" %%a in ('powershell -NoProfile -ExecutionPolicy Bypass -Command "[math]::round((%spazio_finale% - %spazio_iniziale%), 2)"') do set "spazio_guadagnato=%%a"
 
+:: Genera automaticamente il Report sul Desktop
 (
 echo =======================================================
-echo     REPORT DI PULIZIA ESTREMA WINDOWS SPACE OVERLORD
+echo           REPORT DI PULIZIA WINDOWS SPACE OVERLORD
 echo =======================================================
 echo  Data esecuzione: %DATE% alle ore %TIME%
-echo  Totale passaggi eseguiti: 660 / 660
 echo  Scansione SFC inclusa: %esegui_sfc%
 echo  Tempo impiegato: %minuti% minuti e %secondi% secondi
 echo  Spazio Libero Iniziale: %spazio_iniziale% GB
@@ -3922,6 +3950,7 @@ echo  SPAZIO TOTALE RECUPERATO: %spazio_guadagnato% GB
 echo =======================================================
 ) > "%USERPROFILE%\Desktop\Pulizia_Report.txt"
 
+:: Genera la lista dei file pesanti (Scritta su riga singola per evitare blocchi Batch)
 set "report_pesanti=%USERPROFILE%\Desktop\File_Piu_Pesanti.txt"
 echo ======================================================= > "%report_pesanti%"
 echo         LISTA DEI 20 FILE PIU GRANDI SUL TUO PC >> "%report_pesanti%"
@@ -3930,29 +3959,20 @@ echo File maggiori di 1GB ordinati dal piu pesante: >> "%report_pesanti%"
 
 powershell -NoProfile -ExecutionPolicy Bypass -Command "Get-ChildItem -Path C:\Users -Recurse -File -ErrorAction SilentlyContinue | Where-Object { $_.Length -gt 1GB } | Sort-Object Length -Descending | Select-Object -First 20 | ForEach-Object { '[ ' + [math]::round(($_.Length / 1GB), 2) + ' GB ] ' + $_.FullName }" >> "%report_pesanti%"
 
-:: Riproduce il Chime acustico nativo di Windows per avvisare del successo
-powershell -NoProfile -ExecutionPolicy Bypass -Command "[System.Media.SystemSounds]::Asterisk.Play(); Start-Sleep -Milliseconds 300; [System.Media.SystemSounds]::Asterisk.Play()" >nul 2>&1
-
-title Windows Space Overlord - Esecuzione Completata con Successo!
-color 0A
-cls
 echo =======================================================================
 echo    PULIZIA COMPLETATA CON SUCCESSO! IL PC E AL 100%% DELLE PRESTAZIONI.
 echo =======================================================================
-echo.
-echo  [+] STATISTICHE DI SISTEMA:
-echo  ---------------------------------------------------------------------
 echo  Spazio Libero Iniziale: %spazio_iniziale% GB
 echo  Spazio Libero Finale:  %spazio_finale% GB
-echo  Tempo complessivo:     %minuti% min e %secondi% sec
 echo  ---------------------------------------------------------------------
-echo  SPAZIO REALE RECUPERATO: %spazio_guadagnato% GB
+echo  SPAZIO TOTALE RECUPERATO: %spazio_guadagnato% GB
+echo  Tempo impiegato: %minuti% min e %secondi% sec
 echo.
-echo  [+] FILE CREATI SUL TUO DESKTOP:
-echo  * "Pulizia_Report.txt"   - Registro completo della manutenzione.
-echo  * "File_Piu_Pesanti.txt"  - Mappa dei 20 file più grandi scoperti.
+echo  * Nota 1: Un riepilogo dettagliato e stato salvato sul tuo Desktop
+echo    nel file "Pulizia_Report.txt".
+echo  * Nota 2: La lista dei 20 file piu grandi del tuo PC e stata
+echo    salvata sul Desktop nel file "File_Piu_Pesanti.txt".
 echo =======================================================================
 echo.
-echo Premi un tasto qualsiasi per uscire dal programma.
-pause >nul
+pause
 exit
