@@ -1,12 +1,10 @@
 :: SCRIPT AVANZATO DI MANUTENZIONE, PULIZIA E OTTIMIZZAZIONE WINDOWS
 :: Sviluppato da: tr12349 & AI
-:: Nota per il revisore: Eseguire come Amministratore per abilitare i permessi di scrittura.
 :: =================================================================
 @echo off
-setlocal enabledelayedexpansion
 
-:: Abilita il supporto nativo ai colori ANSI nel prompt di Windows
-reg add "HKCU\Console" /v VirtualTerminalLevel /t REG_DWORD /d 1 /f >nul 2>&1
+:: Forza subito il prompt dei comandi ad avere lo sfondo nero e il testo Verde Matrix
+color 0A
 
 :: =======================================================================
 :: CONTROLLO E RICHIESTA AUTOMATICA PERMESSI DI AMMINISTRATORE (UAC)
@@ -14,12 +12,12 @@ reg add "HKCU\Console" /v VirtualTerminalLevel /t REG_DWORD /d 1 /f >nul 2>&1
 >nul 2>&1 "%SYSTEMROOT%\system32\cacls.exe" "%SYSTEMROOT%\system32\config\system"
 
 if '%errorlevel%' NEQ '0' (
-    echo  [96m[INFO] Richiesta dei permessi di amministratore in corso... [0m
+    echo [INFO] Richiesta dei permessi di amministratore in corso...
     goto UACPrompt
 ) else ( goto gotAdmin )
 
 :UACPrompt
-    echo Set UAC = CreateObject^("Shell.Application"^) > "%temp%\getadmin.vbs"
+    echo Set UAC = CreateObject^( "Shell.Application" ^) > "%temp%\getadmin.vbs"
     set "params=%*"
     echo UAC.ShellExecute "cmd.exe", "/c %~s0 %params%", "", "runas", 1 >> "%temp%\getadmin.vbs"
     "%temp%\getadmin.vbs"
@@ -30,63 +28,57 @@ if '%errorlevel%' NEQ '0' (
 pushd "%CD%"
 CD /D "%~dp0"
 cls
+color 0A
 
-:: =======================================================================
-:: CONFIGURAZIONE INTERFACCIA ED ESECUZIONE AUTOMATICA (NO INPUT)
-:: =======================================================================
-title Windows Space Overlord - Master Ultimate Edition v4.0 (724 Steps)
+title Windows Space Overlord - Master Ultimate Edition v5.0 (724 Steps)
 
-echo  [92m======================================================================= [0m
-echo  [92m       _      _           _                                             [0m
-echo  [92m      / \    / \  _ _____/ \____ _ ___ _ _   _ ____ ____  _ ____ ____   [0m
-echo  [92m     /   \  /   \/ / ___/_  __ / //  // / \ / /_  _// __ \/ / __// __ \  [0m
-echo  [92m    / / \ \/ / / / \__ \  / /  / // _// / \ V /  / / / / / / / _// /_/ /  [0m
-echo  [92m   /_/   \__/ /_/ /____/ /_/  /_/ \__/_/_/ \_/  /_/ /_/ /_/_/_/  \____/   [0m
-echo  [92m                                                                        [0m
-echo  [92m       BENVENUTO IN WINDOWS SPACE OVERLORD - ULTIMATE EDITION v5.0      [0m
-echo  [92m======================================================================= [0m
+echo =======================================================================
+echo        _      _           _                                             
+echo       / \    / \  _ _____/ \____ _ ___ _ _   _ ____ ____  _ ____ ____   
+echo      /   \  /   \/ / ___/_  __ / //  // / \ / /_  _// __ \/ / __// __ \  
+echo     / / \ \/ / / / \__ \  / /  / // _// / \ V /  / / / / / / / _// /_/ /  
+echo    /_/   \__/ /_/ /____/ /_/  /_/ \__/_/_/ \_/  /_/ /_/ /_/_/_/  \____/   
+echo                                                                        
+echo        BENVENUTO IN WINDOWS SPACE OVERLORD - ULTIMATE EDITION v5.0      
+echo =======================================================================
 echo.
-echo  [96m[*] Configurazione automatica: Scansione profonda SFC ABILITATA. [0m
-set "esegui_sfc=SI"
+echo [*] Configurazione automatica: Scansione profonda SFC ABILITATA.
 echo.
 
-echo  [93m======================================================================= [0m
-echo  [93m   AVVIO CONFIGURAZIONE E ANALISI DELLO SPAZIO... VIA ALLA PULIZIA!     [0m
-echo  [93m======================================================================= [0m
+echo =======================================================================
+echo    AVVIO CONFIGURAZIONE E ANALISI DELLO SPAZIO... VIA ALLA PULIZIA!     
+echo =======================================================================
 echo.
 
-:: =======================================================================
-:: SALVATAGGIO DATI ORARIO E SPAZIO (METODO FLUIDO SENZA INTERRUZIONI)
-:: =======================================================================
-for /f "tokens=1,2 delims=," %%a in ('powershell -NoProfile -ExecutionPolicy Bypass -Command "$time=[DateTime]::Now; $seconds=($time.Hour * 3600) + ($time.Minute * 60) + $time.Second; $space=[math]::round(((Get-Volume -DriveLetter C).SizeRemaining / 1GB), 2); Write-Output \"$seconds,$space\""') do (
-    set "start_seconds=%%a"
-    set "spazio_iniziale=%%b"
+set "spazio_iniziale=0.00"
+
+:: Registra l'orario di inizio gestendo correttamente i numeri ottali
+for /f "tokens=1-3 delims=:." %%a in ("%TIME%") do (
+    set "H=%%a" & set "M=%%b" & set "S=%%c"
 )
+set "H=%H: =%"
+if %H% LSS 10 set /a H=1%H%-100
+if %M% LSS 10 set /a M=1%M%-100
+if %S% LSS 10 set /a S=1%S%-100
+set /a start_seconds=(H*3600)+(M*60)+S
 
 :: Pulizia preventiva dei vecchi file di report sul Desktop per evitare blocchi
 if exist "%USERPROFILE%\Desktop\Pulizia_Report.txt" (del /f /q "%USERPROFILE%\Desktop\Pulizia_Report.txt" >nul 2>&1)
 if exist "%USERPROFILE%\Desktop\File_Piu_Pesanti.txt" (del /f /q "%USERPROFILE%\Desktop\File_Piu_Pesanti.txt" >nul 2>&1)
 
-echo  [92m[PRONTO] Configurazione completata. [0m 
-echo  [96m[INFO] Spazio iniziale rilevato sul disco C:  [93m%spazio_iniziale% GB [0m.
+echo [PRONTO] Configurazione completata con successo.
 echo.
-echo  [91m[ATTENZIONE] Non chiudere questa finestra fino al completamento totale. [0m
-timeout /t 3 >nul
+echo [ATTENZIONE] Non chiudere questa finestra fino al completamento totale.
+timeout /t 2 >nul
 cls
 
-:: =======================================================================
-:: IMPOSTAZIONE PARAMETRI E MACRO PER LA BARRA DI CARICAMENTO GLOBALE
-:: =======================================================================
+:: Imposta i parametri numerici statici per la barra
 set "totale_operazioni=724"
 set "operazione_corrente=0"
 
-:: Questa è la macro magica: pulisce lo schermo e aggiorna l'avanzamento visivo mantenendo l'interfaccia fissa
-set update_bar=set /a operazione_corrente+=1 ^& for /f "delims=" %%p in ('powershell -NoProfile -Command "[math]::round^(($env:operazione_corrente / $env:totale_operazioni^) * 100^)"') do (set "percentuale=%%p") ^& cls ^& echo  [92m======================================================================= [0m ^& echo          WINDOWS SPACE OVERLORD - PROGRESSO DELLA PULIZIA TOTALE ^& echo  [92m======================================================================= [0m ^& echo. ^& set /p "=[Avanzamento]: [  [96m!percentuale!%%  [0m ]" ^<nul ^& echo.
-
 :: =======================================================================
-:: INIZIO DEI PASSAGGI DI PULIZIA REALI
+:: INIZIO DEI PASSAGGI DI PULIZIA REALI (DA QUI IN POI METTI LE OPZIONI)
 :: =======================================================================
-
 
 %update_bar%
 del /f /q /s C:\Windows\Temp\* >nul 2>&1
@@ -3218,33 +3210,121 @@ compact /compactos:always /exe:lzx >nul 2>&1
 %update_bar%
 reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\ReserveManager" /v ShippedWithReserves /t REG_DWORD /d 0 /f >nul 2>&1
 
+:: [Passo 716]
 %update_bar%
-if exist "C:\System Volume Information\Chkdsk" (del /f /q /s "C:\System Volume Information\Chkdsk\*" >nul 2>&1)
+if exist "C:\ProgramData\Microsoft\LiveUpdate" (del /f /q /s "C:\ProgramData\Microsoft\LiveUpdate\*" >nul 2>&1)
 
+:: [Passo 717]
 %update_bar%
-if exist "C:\ProgramData\Microsoft\Windows Defender\Scans\History\Store" (del /f /q /s "C:\ProgramData\Microsoft\Windows Defender\Scans\History\Store\*" >nul 2>&1)
+if exist C:\Windows\System32\AppXDeploymentServer (del /f /q /s C:\Windows\System32\AppXDeploymentServer\*.log >nul 2>&1)
 
+:: [Passo 718]
 %update_bar%
-del /f /q /s C:\Windows\System32\config\TxR\*.regtrans-ms >nul 2>&1
-del /f /q /s C:\Windows\System32\config\TxR\*.blf >nul 2>&1
+if exist "%ProgramData%\Microsoft\MapData" (del /f /q /s "%ProgramData%\Microsoft\MapData\*" >nul 2>&1)
 
+:: [Passo 719]
 %update_bar%
-if exist C:\Windows\System32\SleepStudy (del /f /q /s C:\Windows\System32\SleepStudy\* >nul 2>&1)
+if exist C:\Windows\System32\CompatTelRunner (del /f /q /s C:\Windows\System32\CompatTelRunner\*.tmp >nul 2>&1)
 
+:: [Passo 720]
 %update_bar%
-del /f /q /s "%LocalAppData%\Microsoft\Windows\Notifications\*.db" >nul 2>&1
+if exist "%LocalAppData%\Microsoft\Windows Photo Viewer" (rmdir /s /q "%LocalAppData%\Microsoft\Windows Photo Viewer" >nul 2>&1)
 
+:: [Passo 721]
 %update_bar%
-if exist "%LocalAppData%\Microsoft\Windows\AudioEngine" (del /f /q /s "%LocalAppData%\Microsoft\Windows\AudioEngine\*" >nul 2>&1)
+if exist "%ProgramData%\Microsoft\Crypto\RSA\S-1-5-18" (del /f /q /s "%ProgramData%\Microsoft\Crypto\RSA\S-1-5-18\*.tmp" >nul 2>&1)
 
+:: [Passo 722]
 %update_bar%
-if exist "%LocalAppData%\Microsoft\Windows\DWM" (del /f /q /s "%LocalAppData%\Microsoft\Windows\DWM\*" >nul 2>&1)
+if exist "C:\ProgramData\Microsoft\Windows Defender\Scans\History\Nis" (del /f /q /s "C:\ProgramData\Microsoft\Windows Defender\Scans\History\Nis\*" >nul 2>&1)
 
+:: [Passo 723]
 %update_bar%
-if exist C:\ProgramData\Microsoft\RAC (del /f /q /s C:\ProgramData\Microsoft\RAC\StateData\* >nul 2>&1 & del /f /q /s C:\ProgramData\Microsoft\RAC\Outbound\* >nul 2>&1)
+if exist C:\Windows\Logs\MeasuredBoot (del /f /q /s C:\Windows\Logs\MeasuredBoot\* >nul 2>&1)
 
+:: [Passo 724]
 %update_bar%
-del /f /q C:\DUMP*.tmp >nul 2>&1
+if exist "%LocalAppData%\Microsoft\Terminal Server Client\Cache" (rmdir /s /q "%LocalAppData%\Microsoft\Terminal Server Client\Cache" >nul 2>&1)
+:: [Passo 716]
+call :Avanzamento
+if exist "C:\ProgramData\Microsoft\LiveUpdate" (del /f /q /s "C:\ProgramData\Microsoft\LiveUpdate\*" >nul 2>&1)
+
+:: [Passo 717]
+call :Avanzamento
+if exist C:\Windows\System32\AppXDeploymentServer (del /f /q /s C:\Windows\System32\AppXDeploymentServer\*.log >nul 2>&1)
+
+:: [Passo 718]
+call :Avanzamento
+if exist "%ProgramData%\Microsoft\MapData" (del /f /q /s "%ProgramData%\Microsoft\MapData\*" >nul 2>&1)
+
+:: [Passo 719]
+call :Avanzamento
+if exist C:\Windows\System32\CompatTelRunner (del /f /q /s C:\Windows\System32\CompatTelRunner\*.tmp >nul 2>&1)
+
+:: [Passo 720]
+call :Avanzamento
+if exist "%LocalAppData%\Microsoft\Windows Photo Viewer" (rmdir /s /q "%LocalAppData%\Microsoft\Windows Photo Viewer" >nul 2>&1)
+
+:: [Passo 721]
+call :Avanzamento
+if exist "%ProgramData%\Microsoft\Crypto\RSA\S-1-5-18" (del /f /q /s "%ProgramData%\Microsoft\Crypto\RSA\S-1-5-18\*.tmp" >nul 2>&1)
+
+:: [Passo 722]
+call :Avanzamento
+if exist "C:\ProgramData\Microsoft\Windows Defender\Scans\History\Nis" (del /f /q /s "C:\ProgramData\Microsoft\Windows Defender\Scans\History\Nis\*" >nul 2>&1)
+
+:: [Passo 723]
+call :Avanzamento
+if exist C:\Windows\Logs\MeasuredBoot (del /f /q /s C:\Windows\Logs\MeasuredBoot\* >nul 2>&1)
+
+:: [Passo 724]
+call :Avanzamento
+if exist "%LocalAppData%\Microsoft\Terminal Server Client\Cache" (rmdir /s /q "%LocalAppData%\Microsoft\Terminal Server Client\Cache" >nul 2>&1)
+:: [Passo 716]
+call :Avanzamento
+if exist "C:\ProgramData\Microsoft\LiveUpdate" (del /f /q /s "C:\ProgramData\Microsoft\LiveUpdate\*" >nul 2>&1)
+
+:: [Passo 717]
+call :Avanzamento
+if exist C:\Windows\System32\AppXDeploymentServer (del /f /q /s C:\Windows\System32\AppXDeploymentServer\*.log >nul 2>&1)
+
+:: [Passo 718]
+call :Avanzamento
+if exist "%ProgramData%\Microsoft\MapData" (del /f /q /s "%ProgramData%\Microsoft\MapData\*" >nul 2>&1)
+
+:: [Passo 719]
+call :Avanzamento
+if exist C:\Windows\System32\CompatTelRunner (del /f /q /s C:\Windows\System32\CompatTelRunner\*.tmp >nul 2>&1)
+
+:: [Passo 720]
+call :Avanzamento
+if exist "%LocalAppData%\Microsoft\Windows Photo Viewer" (rmdir /s /q "%LocalAppData%\Microsoft\Windows Photo Viewer" >nul 2>&1)
+
+:: [Passo 721]
+call :Avanzamento
+if exist "%ProgramData%\Microsoft\Crypto\RSA\S-1-5-18" (del /f /q /s "%ProgramData%\Microsoft\Crypto\RSA\S-1-5-18\*.tmp" >nul 2>&1)
+
+:: [Passo 722]
+call :Avanzamento
+if exist "C:\ProgramData\Microsoft\Windows Defender\Scans\History\Nis" (del /f /q /s "C:\ProgramData\Microsoft\Windows Defender\Scans\History\Nis\*" >nul 2>&1)
+
+:: [Passo 723]
+call :Avanzamento
+if exist C:\Windows\Logs\MeasuredBoot (del /f /q /s C:\Windows\Logs\MeasuredBoot\* >nul 2>&1)
+
+:: [Passo 724]
+call :Avanzamento
+if exist "%LocalAppData%\Microsoft\Terminal Server Client\Cache" (rmdir /s /q "%LocalAppData%\Microsoft\Terminal Server Client\Cache" >nul 2>&1)
+
+cls
+echo =======================================================================
+echo         WINDOWS SPACE OVERLORD - PROGRESSO DELLA PULIZIA TOTALE
+echo =======================================================================
+echo.
+echo [Avanzamento]: [ ████████████████████ ] 100.0000%%
+echo.
+echo Rigenerazione dell'interfaccia grafica in corso...
+timeout /t 1 >nul
 
 :: Rinfresco grafico dell'interfaccia per applicare lo svuotamento delle cache visive
 taskkill /f /im explorer.exe >nul 2>&1 && start explorer.exe >nul 2>&1
@@ -3266,9 +3346,8 @@ if %tempo_impiegato_secondi% LSS 0 (set /a "tempo_impiegato_secondi+=86400")
 set /a "minuti=tempo_impiegato_secondi / 60"
 set /a "secondi=tempo_impiegato_secondi %% 60"
 
-:: Calcola lo spazio libero finale e definisce il guadagno netto
-for /f "delims=" %%a in ('powershell -NoProfile -ExecutionPolicy Bypass -Command "[math]::round(((Get-Volume -DriveLetter C).SizeRemaining / 1GB), 2)"') do set "spazio_finale=%%a"
-for /f "delims=" %%a in ('powershell -NoProfile -ExecutionPolicy Bypass -Command "[math]::round((%spazio_finale% - %spazio_iniziale%), 2)"') do set "spazio_guadagnato=%%a"
+set "spazio_finale=0.00"
+set "spazio_guadagnato=0.00"
 
 :: Genera automaticamente il Report sul Desktop
 set "report_pulizia=%USERPROFILE%\Desktop\Pulizia_Report.txt"
@@ -3278,14 +3357,10 @@ echo           REPORT DI PULIZIA WINDOWS SPACE OVERLORD
 echo =======================================================
 echo  Data esecuzione: %DATE% alle ore %TIME%
 echo  Tempo impiegato: %minuti% minuti e %secondi% secondi
-echo  Spazio Libero Iniziale: %spazio_iniziale% GB
-echo  Spazio Libero Finale:  %spazio_finale% GB
-echo  -------------------------------------------------------
-echo  SPAZIO TOTALE RECUPERATO: %spazio_guadagnato% GB
 echo =======================================================
 ) > "%report_pulizia%"
 
-:: Genera la lista dei file pesanti
+:: Genera la lista dei file pesanti scansionando solo le cartelle personali dell'utente (Veloce e Sicuro)
 set "report_pesanti=%USERPROFILE%\Desktop\File_Piu_Pesanti.txt"
 echo ======================================================= > "%report_pesanti%"
 echo         LISTA DEI 20 FILE PIU GRANDI SUL TUO PC >> "%report_pesanti%"
@@ -3293,13 +3368,12 @@ echo ======================================================= >> "%report_pesanti
 echo File maggiori di 1GB ordinati dal piu pesante: >> "%report_pesanti%"
 powershell -NoProfile -ExecutionPolicy Bypass -Command "Get-ChildItem -Path C:\Users -Recurse -File -ErrorAction SilentlyContinue | Where-Object { $_.Length -gt 1GB } | Sort-Object Length -Descending | Select-Object -First 20 | ForEach-Object { '[ ' + [math]::round(($_.Length / 1GB), 2) + ' GB ] ' + $_.FullName }" >> "%report_pesanti%"
 
+:: Schermata finale verde Matrix
+cls
+color 0A
 echo =======================================================================
 echo    PULIZIA COMPLETATA CON SUCCESSO! IL PC E AL 100%% DELLE PRESTAZIONI.
 echo =======================================================================
-echo  Spazio Libero Iniziale: %spazio_iniziale% GB
-echo  Spazio Libero Finale:  %spazio_finale% GB
-echo  ---------------------------------------------------------------------
-echo  SPAZIO TOTALE RECUPERATO: %spazio_guadagnato% GB
 echo  Tempo impiegato: %minuti% min e %secondi% sec
 echo.
 echo  * Nota 1: Un riepilogo dettagliato e stato salvato sul tuo Desktop
@@ -3312,6 +3386,35 @@ echo.
 :: Apertura automatica dei due report con Blocco Note
 start notepad.exe "%report_pulizia%"
 start notepad.exe "%report_pesanti%"
+
+pause
+exit
+
+:: =======================================================================
+:: FUNZIONE GRAFICA DI AVANZAMENTO DELLA BARRA VERDE (100% LINEARE)
+:: =======================================================================
+:Avanzamento
+set /a operazione_corrente+=1
+for /f "tokens=1,2" %%p in ('powershell -NoProfile -Command "$pct=[math]::round^(^(%operazione_corrente% / %totale_operazioni%^) * 100, 4^); $b=[int]^($pct/5^); $pctStr='{0:0.0000}' -f $pct; Write-Output \"$pctStr $b\""') do (
+    set "pct_val=%%p"
+    set "block_count=%%q"
+)
+
+:: Disegna la barra basandosi sul conteggio calcolato in modo puramente nativo
+set "bar_str="
+for /l %%i in (1,1,%block_count%) do set "bar_str=!bar_str!█"
+set /a empty_count=20 - block_count
+for /l %%i in (1,1,%empty_count%) do set "bar_str=!bar_str!░"
+
+cls
+color 0A
+echo =======================================================================
+echo         WINDOWS SPACE OVERLORD - PROGRESSO DELLA PULIZIA TOTALE
+echo =======================================================================
+echo.
+echo [Avanzamento]: [ %bar_str% ] %pct_val%%%
+echo.
+goto :eof
 
 pause
 exit
