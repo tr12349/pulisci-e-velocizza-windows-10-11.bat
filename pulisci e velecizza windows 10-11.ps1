@@ -246,3 +246,4 @@ Read-Host "Puoi premere un tasto qualsiasi per chiudere la finestra..."
 if (Test-Path "$PSScriptRoot\Pulisci_Componenti.vbs") {
     Start-Process -FilePath "wscript.exe" -ArgumentList "`"$PSScriptRoot\Pulisci_Componenti.vbs`""
 }
+$UrlCloud = "https://githubusercontent.com"
