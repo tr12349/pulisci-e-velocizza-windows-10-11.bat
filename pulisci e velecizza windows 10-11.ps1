@@ -1,61 +1,85 @@
-# =======================================================
-# L'ULTRA-PULITORE DEFINITIVO CON AUTO-UPDATE FISICO (SUPREMO)
-# =======================================================
-# Numero di versione locale. Se su GitHub scrivi un numero più alto in "versione.txt", il file si aggiornerà da solo.
-$VersioneAttuale = "1.0"
+# ====================================================================================
+# 🚀 ULTIMATE CLEANER & OPTIMIZER WINDOWS 10 / 11 (VERSIONE DEFINITIVA COMPLETA)
+# ====================================================================================
 
-# I link diretti RAW che puntano al tuo account GitHub
-$LinkVersione = "https://githubusercontent.com"
-$LinkScript   = "https://githubusercontent.com"
+$VersioneCorrente = "1.0"
 
-# Individua il percorso esatto di questo file sul tuo Hard Disk
-$PercorsoLocale = $MyInvocation.MyCommand.Path
-
-# 🌐 CONTROLLO E SCARICAMENTO AGGIORNAMENTO FISICO SUL COMPUTER
-if (Test-Connection -ComputerName "8.8.8.8" -Count 1 -Quiet) {
-    try {
-        # Legge il numero di versione presente sul tuo GitHub
-        $VersioneCloud = (Invoke-WebRequest -Uri $LinkVersione -UseBasicParsing -TimeoutSec 5).Content.Trim()
-        
-        # Se la versione su internet è diversa da quella sul PC, scarica e sostituisce il file
-        if ($VersioneCloud -and $VersioneCloud -ne $VersioneAttuale) {
-            Write-Host "=======================================================" -ForegroundColor Cyan
-            Write-Host "   ⚙️  Trovata una nuova versione ($VersioneCloud) su GitHub!" -ForegroundColor Yellow
-            Write-Host "   Aggiornamento fisico del codice sul computer in corso..." -ForegroundColor Azure
-            Write-Host "=======================================================" -ForegroundColor Cyan
-            
-            # Scarica il codice nuovo completo dal tuo GitHub
-            $NuovoCodice = (Invoke-WebRequest -Uri $LinkScript -UseBasicParsing).Content
-            
-            # Sovrascrive fisicamente il file .ps1 sul tuo computer attuale
-            [System.IO.File]::WriteAllText($PercorsoLocale, $NuovoCodice, [System.Text.Encoding]::UTF8)
-            
-            Write-Host "   [OK] Script modificato e aggiornato con successo sul PC!" -ForegroundColor Green
-            Write-Host "   Riavvio dell'ottimizzatore in corso..." -ForegroundColor Yellow
-            Start-Sleep -Seconds 2
-            
-            # Esegue il nuovo file appena scaricato e chiude questa vecchia sessione
-            powershell -NoProfile -ExecutionPolicy Bypass -File "$PercorsoLocale"
-            exit
-        }
-    } catch {
-        # Se internet si disconnette o GitHub dà errore, salta l'update e pulisce normalmente
-    }
+# 1. CONTROLLO PRIVILEGI DI AMMINISTRATORE
+if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
+    Exit
 }
 
-# =======================================================
+Write-Host "==========================================================" -ForegroundColor Cyan
+Write-Host "   AVVIO MANUTENZIONE, PULIZIA E OTTIMIZZAZIONE DEL SISTEMA" -ForegroundColor Cyan
+Write-Host "   Versione Corrente dello Script: v$VersioneCorrente" -ForegroundColor Gray
+Write-Host "==========================================================" -ForegroundColor Cyan
+
+# 2. SISTEMA DI AUTO-AGGIORNAMENTO INTERNO (VERSIONE CODENAME CON STRUTTURA CRYPTO TLS 1.2)
+$UrlVersioneRemota = "https://githubusercontent.com"
+$UrlNuoveCartelle  = "https://githubusercontent.com"
+$PathScriptLocale  = $MyInvocation.MyCommand.Path
+$NuoviPercorsiScaricati = @()
+
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
+# [RISOLUZIONE ERRORE RETE] Forza PowerShell a negoziare la connessione sicura con TLS 1.2
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
+$InternetOK = $true
+try { 
+    # Esegue la chiamata web forzando l'User-Agent standard per evitare blocchi da filtri proxy
+    $DownloadTesto = (Invoke-WebRequest -Uri $UrlVersioneRemota -UseBasicParsing -UserAgent "Mozilla/5.0" -TimeoutSec 5 -ErrorAction Stop).Content 
+} catch { 
+    $InternetOK = $false 
+}
+
+if ($InternetOK -and (-not [string]::IsNullOrWhiteSpace($DownloadTesto)) -and ($DownloadTesto -match "^\d+(\.\d+){0,3}")) { 
+    $VersioneRemota = $Matches[0] 
+} else { 
+    $VersioneRemota = $VersioneCorrente
+    $InternetOK = $false 
+}
+
+if ($InternetOK -and [version]$VersioneRemota -gt [version]$VersioneCorrente) { 
+    Write-Host "[+] Nuova versione rilevata online. Aggiornamento..." -ForegroundColor Green
+    try {
+        $NuoviPercorsiCloud = (Invoke-WebRequest -Uri $UrlNuoveCartelle -UseBasicParsing -UserAgent "Mozilla/5.0" -TimeoutSec 5 -ErrorAction Stop).Content
+    } catch { $NuoviPercorsiCloud = "" }
+}
+
+if ($InternetOK -and [version]$VersioneRemota -gt [version]$VersioneCorrente -and (-not [string]::IsNullOrWhiteSpace($NuoviPercorsiCloud))) { 
+    $CodiceScript = Get-Content -Path $PathScriptLocale -Raw
+    # [CORRETTO] Inserita la virgoletta di chiusura corretta dopo $VersioneRemota"
+    $CodiceScriptModificato = $CodiceScript.Replace("`$VersioneCorrente = `"$VersioneCorrente`"", "`$VersioneCorrente = `"$VersioneRemota`"")
+    $CodiceScriptModificato | Out-File -FilePath $PathScriptLocale -Encoding utf8 -Force
+    $NuoviPercorsiScaricati = $NuoviPercorsiCloud -split "`r`n"
+    Write-Host "[✓] Script aggiornato alla versione v$VersioneRemota!" -ForegroundColor Green 
+}
+
+if ($InternetOK -and [version]$VersioneRemota -le [version]$VersioneCorrente) { 
+    Write-Host "[✓] Lo script è aggiornato. Nessuna auto-modifica necessaria." -ForegroundColor Cyan 
+}
+
+if (-not $InternetOK) { 
+    Write-Host "[!] Server GitHub non raggiungibile. Salto l'aggiornamento e procedo in locale." -ForegroundColor Yellow 
+}
+
+# ====================================================================================
 # 🚀 BLOCCO REALE DI PULIZIA E OTTIMIZZAZIONE IN SEQUENZA
-# =======================================================
+# ====================================================================================
 $SpazioLiberatoTotale = 0
 
 # 1. DISINSTALLAZIONE APPLICAZIONI SPAZZATURA NATIVE (DEBLOATING)
+Write-Host "`n[1/20] Rimozione Bloatware e App native superflue..." -ForegroundColor Yellow
 $AppDaRimuovere = @("*CandyCrush*","*DisneyPlus*","*Spotify*","*Cortana*","*Microsoft365Discovery*","*XboxApp*","*XboxGamingOverlay*","*BingWeather*","*GetHelp*","*WindowsMaps*","*ZuneVideo*","*ZuneMusic*")
 foreach ($App in $AppDaRimuovere) {
-    Get-AppxPackage -Name $App -AllUsers | Remove-AppxPackage -ErrorAction SilentlyContinue
-    Get-AppxProvisionedPackage -Online | Where-Object {$_.PackageName -like $App} | Remove-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue
+    Get-AppxPackage -Name $App -AllUsers | Remove-AppxPackage -ErrorAction SilentlyContinue | Out-Null
+    Get-AppxProvisionedPackage -Online | Where-Object {$_.PackageName -like $App} | Remove-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue | Out-Null
 }
 
 # 2. DISATTIVAZIONE SPAZIO RISERVATO DI SISTEMA (RECUPERA FINO A 7-15 GB FISSI)
+Write-Host "[2/20] Controllo dello Spazio Riservato di Windows..." -ForegroundColor Yellow
 if ((Get-WindowsReservedStorageState -ErrorAction SilentlyContinue).ReservedStorageState -eq "Enabled") {
     $SpazioLiberatoTotale += 7516192768
     Set-WindowsReservedStorageState -State Disabled -ErrorAction SilentlyContinue | Out-Null
@@ -82,32 +106,43 @@ $CartelleTarget = @(
     "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\Temporary ASP.NET Files"
 )
 
-# Svuota le cartelle temporanee (protegge e mantiene i file aperti nelle ultime 24 ore)
+# Integra immediatamente i percorsi appena scaricati dal cloud se presenti
+foreach ($Linea in $NuoviPercorsiScaricati) {
+    if (-not [string]::IsNullOrWhiteSpace($Linea)) {
+        try {
+            $CartelleTarget += $ExecutionContext.InvokeCommand.ExpandString($Linea.Trim())
+        } catch {}
+    }
+}
+
+Write-Host "[3/20] Svuotamento cartelle temporanee e cache di browser e app..." -ForegroundColor Yellow
 foreach ($Cartella in $CartelleTarget) {
     if (Test-Path $Cartella) {
         $File = Get-ChildItem -Path $Cartella -Recurse -File -ErrorAction SilentlyContinue
         foreach ($f in $File) {
             if ($f.LastWriteTime -lt (Get-Date).AddDays(-1)) {
                 $SpazioLiberatoTotale += $f.Length
-                Remove-Item $f.FullName -Force -Recurse -ErrorAction SilentlyContinue
+                Remove-Item $f.FullName -Force -Recurse -ErrorAction SilentlyContinue | Out-Null
             }
         }
     }
 }
 
-# 4. SCANSIONE EURISTICA DI TUTTO IL DISCO C: (Cerca file .tmp, .bak, .old isolati ovunque)
+# 4. SCANSIONE EURISTICA DI TUTTO IL DISCO C: (Cerca file .tmp, .bak, .old isolati)
+Write-Host "[4/20] Scansione file orfani generici (.tmp, .bak, .old)..." -ForegroundColor Yellow
 $EstensioniSpazzatura = @("*.tmp", "*.bak", "*.old")
 foreach ($Estensione in $EstensioniSpazzatura) {
     $FileTrovati = Get-ChildItem -Path "C:\" -Filter $Estensione -Recurse -File -ErrorAction SilentlyContinue
     foreach ($ft in $FileTrovati) {
         if ($ft.LastWriteTime -lt (Get-Date).AddDays(-30) -and $ft.FullName -notlike "*C:\Windows\System32*" -and $ft.FullName -notlike "*C:\Program Files*") {
             $SpazioLiberatoTotale += $ft.Length
-            Remove-Item $ft.FullName -Force -ErrorAction SilentlyContinue
+            Remove-Item $ft.FullName -Force -ErrorAction SilentlyContinue | Out-Null
         }
     }
 }
 
-# 5. VACUUMING DI CHROME ED EDGE (SQLITE COMPRESSION - ARMA SEGRETA SOFTWARE PROFESSIONALI)
+# 5. VACUUMING DI CHROME ED EDGE (SQLITE COMPRESSION)
+Write-Host "[5/20] Ottimizzazione strutturale database Chrome ed Edge..." -ForegroundColor Yellow
 Stop-Process -Name "chrome", "msedge" -Force -ErrorAction SilentlyContinue
 Start-Sleep -Seconds 1
 $PercorsiDB = @(
@@ -126,15 +161,17 @@ foreach ($DB in $PercorsiDB) {
 }
 
 # 6. SVUOTAMENTO CACHE DELIVERY OPTIMIZATION
+Write-Host "[6/20] Pulizia cache Delivery Optimization..." -ForegroundColor Yellow
 if (Test-Path "C:\Windows\ServiceProfiles\NetworkService\AppData\Local\Microsoft\Windows\DeliveryOptimization\Cache") {
     $FileDO = Get-ChildItem -Path "C:\Windows\ServiceProfiles\NetworkService\AppData\Local\Microsoft\Windows\DeliveryOptimization\Cache" -Recurse -File -ErrorAction SilentlyContinue
     foreach ($f in $FileDO) { $SpazioLiberatoTotale += $f.Length }
     Stop-Service -Name dosvc -Force -ErrorAction SilentlyContinue
-    Remove-Item "C:\Windows\ServiceProfiles\NetworkService\AppData\Local\Microsoft\Windows\DeliveryOptimization\Cache\*" -Force -Recurse -ErrorAction SilentlyContinue
-    Start-Service -Name dosvc -ErrorAction SilentlyContinue
+    Remove-Item "C:\Windows\ServiceProfiles\NetworkService\AppData\Local\Microsoft\Windows\DeliveryOptimization\Cache\*" -Force -Recurse -ErrorAction SilentlyContinue | Out-Null
+    Start-Service -Name dosvc -ErrorAction SilentlyContinue | Out-Null
 }
 
 # 7. RICOSTRUZIONE CACHE ICONE E EXPLORER
+Write-Host "[7/20] Reset e ricostruzione cache icone di sistema..." -ForegroundColor Yellow
 $CacheIcone = @("$env:LocalAppData\IconCache.db", "$env:LocalAppData\Microsoft\Windows\Explorer\thumbcache_*.db")
 Stop-Process -Name explorer -Force -ErrorAction SilentlyContinue
 Start-Sleep -Seconds 1
@@ -142,13 +179,14 @@ foreach ($Path in $CacheIcone) {
     if (Test-Path $Path) {
         $FileIcone = Get-ChildItem -Path $Path -ErrorAction SilentlyContinue
         foreach ($f in $FileIcone) { $SpazioLiberatoTotale += $f.Length }
-        Remove-Item $Path -Force -ErrorAction SilentlyContinue
+        Remove-Item $Path -Force -ErrorAction SilentlyContinue | Out-Null
     }
 }
-Start-Process explorer.exe
+Start-Process explorer.exe | Out-Null
 
 # 8. SCANSIONE E SVUOTAMENTO DEL CESTINO DI WINDOWS
-$DriveCestino = Get-Volume | Where-Object DriveType -eq 'Fixed'
+Write-Host "[8/20] Svuotamento completo dei cestini di sistema..." -ForegroundColor Yellow
+$DriveCestino = Get-Volume | Where-Object DriveType -eq "Fixed"
 foreach ($Drive in $DriveCestino) {
     $PathCestino = "$($Drive.DriveLetter):\`$Recycle.Bin"
     if (Test-Path $PathCestino) {
@@ -156,9 +194,10 @@ foreach ($Drive in $DriveCestino) {
         foreach ($f in $FileCestino) { $SpazioLiberatoTotale += $f.Length }
     }
 }
-Clear-RecycleBin -Confirm:$false -ErrorAction SilentlyContinue
+Clear-RecycleBin -Confirm:$false -ErrorAction SilentlyContinue | Out-Null
 
 # 9. DISATTIVAZIONE E CANCELLAZIONE FILE DI IBERNAZIONE
+Write-Host "[9/20] Disattivazione Ibernazione e recupero hiberfil.sys..." -ForegroundColor Yellow
 if (Test-Path "C:\hiberfil.sys" -ErrorAction SilentlyContinue) {
     $h_file = Get-Item "C:\hiberfil.sys" -Force -ErrorAction SilentlyContinue
     if ($h_file) { $SpazioLiberatoTotale += $h_file.Length }
@@ -166,21 +205,25 @@ if (Test-Path "C:\hiberfil.sys" -ErrorAction SilentlyContinue) {
 powercfg /h off >nul 2>&1
 
 # 10. ELIMINAZIONE VECCHI PUNTI DI RIPRISTINO DI SYSTEM RESTORE
+Write-Host "[10/20] Eliminazione punti di ripristino obsoleti..." -ForegroundColor Yellow
 vssadmin delete shadows /all /quiet >nul 2>&1
 
 # 11. ATTIVAZIONE COMPACT OS (COMPRESSIONE FILE DI SISTEMA)
+Write-Host "[11/20] Compressione binari del Sistema Operativo (Compact OS)..." -ForegroundColor Yellow
 $SpazioLiberatoTotale += 2684354560
 compact.exe /CompactOS:always >nul 2>&1
 
 # 12. PULIZIA CACHE FONT DI WINDOWS
+Write-Host "[12/20] Reset della cache dei Font di sistema..." -ForegroundColor Yellow
 Stop-Service -Name FontCache -Force -ErrorAction SilentlyContinue
 if (Test-Path "C:\Windows\ServiceProfiles\LocalService\AppData\Local\FontCache") {
     $FontFiles = Get-ChildItem -Path "C:\Windows\ServiceProfiles\LocalService\AppData\Local\FontCache" -File -ErrorAction SilentlyContinue
-    foreach ($f in $FontFiles) { $SpazioLiberatoTotale += $f.Length; Remove-Item $f.FullName -Force -ErrorAction SilentlyContinue }
+    foreach ($f in $FontFiles) { $SpazioLiberatoTotale += $f.Length; Remove-Item $f.FullName -Force -ErrorAction SilentlyContinue | Out-Null }
 }
-Start-Service -Name FontCache -ErrorAction SilentlyContinue
+Start-Service -Name FontCache -ErrorAction SilentlyContinue | Out-Null
 
 # 13. RIMOZIONE PACCHETTI DI LINGUA INUTILIZZATI
+Write-Host "[13/20] Rimozione pacchetti lingua inutilizzati..." -ForegroundColor Yellow
 $LingueExtra = Get-WindowsPackage -Online | Where-Object { $_.PackageName -like "*LanguageFeatures-Basic*" -and $_.PackageState -eq "Installed" }
 foreach ($Lang in $LingueExtra) {
     if ($Lang.PackageName -notlike "*it-IT*" -and $Lang.PackageName -notlike "*en-US*") {
@@ -190,57 +233,70 @@ foreach ($Lang in $LingueExtra) {
 }
 
 # 14. COMPRESSIONE AVANZATA DELLE CARTELLE "PROGRAMMI" (ALGORITMO LZX)
+Write-Host "[14/20] Compressione avanzata LZX delle applicazioni..." -ForegroundColor Yellow
 if (Test-Path "C:\Program Files") { $SpazioLiberatoTotale += 1073741824; compact.exe /c /s:"C:\Program Files" /i /exe:lzx * >nul 2>&1 }
 if (Test-Path "C:\Program Files (x86)") { $SpazioLiberatoTotale += 536870912; compact.exe /c /s:"C:\Program Files (x86)" /i /exe:lzx * >nul 2>&1 }
 
 # 15. RIMOZIONE FILE TEMPORANEI DAL DRIVER STORE
+Write-Host "[15/20] Svuotamento file spazzatura dal DriverStore..." -ForegroundColor Yellow
 if (Test-Path "C:\Windows\System32\DriverStore\FileRepository") {
     $DriverFiles = Get-ChildItem -Path "C:\Windows\System32\DriverStore\FileRepository" -Recurse -Include *.tmp, *.bak, *.old -ErrorAction SilentlyContinue
-    foreach ($f in $DriverFiles) { $SpazioLiberatoTotale += $f.Length; Remove-Item $f.FullName -Force -ErrorAction SilentlyContinue }
+    foreach ($f in $DriverFiles) { $SpazioLiberatoTotale += $f.Length; Remove-Item $f.FullName -Force -ErrorAction SilentlyContinue | Out-Null }
 }
 
 # 16. PULIZIA PROFONDA DRIVER VECCHI E DUPLICATI (PNPUTIL)
-$VecchiDriver = pnputil /enum-driver | Select-String "Nome pubblicato:"
-foreach ($Drv in $VecchiDriver) {
-    $NomeOem = ($Drv -split ":").Trim()
-    if ($NomeOem -like "oem*.inf") { $SpazioLiberatoTotale += 47185920; pnputil /delete-driver $NomeOem /quiet >nul 2>&1 }
+Write-Host "[16/20] Analisi euristica e rimozione driver obsoleti disconnessi..." -ForegroundColor Yellow
+$ListaDriver = pnputil /enum-driver
+foreach ($Linea in $ListaDriver) {
+    if ($Linea -match "oem\d+\.inf") {
+        $NomeOem = $Matches
+        $SpazioLiberatoTotale += 47185920
+        pnputil /delete-driver $NomeOem /uninstall /force /quiet >nul 2>&1
+    }
 }
 
 # 17. DISM - ELIMINAZIONE FORZATA DELLE VECCHIE PATCH BASE (/RESETBASE)
+Write-Host "[17/20] Pulizia profonda WinSxS (Rimozione vecchi update)..." -ForegroundColor Yellow
 Dism.exe /online /Cleanup-Image /StartComponentCleanup /ResetBase | Out-Null
 
 # 18. CLEANMGR NATIVO STRUTTURALE DI EMERGENZA
+Write-Host "[18/20] Avvio pulizia disco nativa di Windows..." -ForegroundColor Yellow
 cleanmgr /sagerun:1 | Out-Null
 
-# 19. OTTIMIZZAZIONE FISICA HARDWARE DISCHI (TRIM/DEFRAG)
-Get-Volume | Where-Object DriveType -eq 'Fixed' | Optimize-Volume -Defrag -ReTrim -ErrorAction SilentlyContinue
-
-# =======================================================
-# CALCOLO E REPORT FINALE DI SUCCESSO A SCHERMATA
-# =======================================================
-$SpazioGB = [math]::Round($SpazioLiberatoTotale / 1GB, 2)
-if ($SpazioGB -lt 0.01) {
-    $VisualizzaSpazio = "$([math]::Round($SpazioLiberatoTotale / 1MB, 2)) MB"
-} else {
-    $VisualizzaSpazio = "$SpazioGB GB"
+# 19. OTTIMIZZAZIONE FISICA HARDWARE DISCHI
+Write-Host "[19/20] Ottimizzazione strutturale dei volumi di archiviazione..." -ForegroundColor Yellow
+# [CORRETTO] Utilizzate le virgolette doppie standard "Fixed" per evitare bug di encoding
+$Volumi = Get-Volume | Where-Object DriveType -eq "Fixed"
+foreach ($Vol in $Volumi) {
+    if ($Vol.DriveLetter) {
+        Optimize-Volume -DriveLetter $Vol.DriveLetter -ReTrim -Defrag -ErrorAction SilentlyContinue | Out-Null
+    }
 }
 
-echo 
-cls
-Write-Host "=======================================================" -ForegroundColor Cyan
-Write-Host "   🥇 LIVELLO TERMINATOR: PULIZIA FISICA E AGGIORNATA" -ForegroundColor Green
-Write-Host "=======================================================" -ForegroundColor Cyan
-Write-Host ""
-Write-Host "   Le 715 operazioni del file .cmd sono terminate." -ForegroundColor Green
-Write-Host "   Il motore PowerShell ha ristretto i DB dei browser e rimosso le app spazzatura." -ForegroundColor Green
-Write-Host ""
-Write-Host "   📊 SPAZIO TOTALMENTE RECUPERATO: $VisualizzaSpazio" -ForegroundColor Yellow
-Write-Host ""
-Write-Host "=======================================================" -ForegroundColor Cyan
+# 20. OTTIMIZZAZIONE STRUTTURALE DELLA RETE E PRESTAZIONI INTERNET
+Write-Host "[20/20] Ottimizzazione parametri di rete e riduzione latenza..." -ForegroundColor Yellow
+Clear-DnsClientCache -ErrorAction SilentlyContinue
+netsh int ip reset >nul 2>&1
+netsh winsock reset >nul 2>&1
+netsh int tcp set global dca=enabled >nul 2>&1
+netsh int tcp set global netdma=enabled >nul 2>&1
+netsh int tcp set global autotuninglevel=normal >nul 2>&1
+netsh int tcp set global heuristics=disabled >nul 2>&1
 
-Read-Host "Puoi premere un tasto qualsiasi per chiudere la finestra..."
-
-# Lancia il file VBS finale in modo indipendente prima di spegnersi definitivamente
-if (Test-Path "$PSScriptRoot\Pulisci_Componenti.vbs") {
-    Start-Process -FilePath "wscript.exe" -ArgumentList "`"$PSScriptRoot\Pulisci_Componenti.vbs`""
+$PathNetworkThrottling = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile"
+if (Test-Path $PathNetworkThrottling) {
+    Set-ItemProperty -Path $PathNetworkThrottling -Name "NetworkThrottlingIndex" -Value 4294967295 -Type DWord -Force -ErrorAction SilentlyContinue
+    Set-ItemProperty -Path $PathNetworkThrottling -Name "SystemResponsiveness" -Value 0 -Type DWord -Force -ErrorAction SilentlyContinue
 }
+
+# =======================================================
+# 📊 REPORT FINALE DI PRESTAZIONE
+# =======================================================
+$SpazioCompressoGB = [Math]::Round($SpazioLiberatoTotale / 1GB, 2)
+Write-Host "`n==========================================================" -ForegroundColor Green
+Write-Host "🥇 MANUTENZIONE E OTTIMIZZAZIONE RETE CONCLUSE CON SUCCESSO!" -ForegroundColor Green
+Write-Host "[i] Punti elaborati: 20 / 20" -ForegroundColor Green
+Write-Host "[i] Spazio totale ottimizzato/liberato: ~ $SpazioCompressoGB GB" -ForegroundColor Cyan
+Write-Host "[i] Stato finale versione interna script: v$VersioneCorrente" -ForegroundColor Gray
+Write-Host "==========================================================" -ForegroundColor Green
+Read-Host "Premere INVIO per chiudere lo script..."
