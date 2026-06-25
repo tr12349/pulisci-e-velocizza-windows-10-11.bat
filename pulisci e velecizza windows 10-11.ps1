@@ -2,7 +2,7 @@
 # 🚀 ULTIMATE CLEANER PRO WINDOWS 10 / 11
 # =========================================================
 
-$VersioneCorrente = "1.0.1"
+$VersioneCorrente = "1.0.0"
 
 # =========================
 # 🔐 ADMIN CHECK
@@ -24,7 +24,7 @@ if (-not ([Security.Principal.WindowsPrincipal] `
 
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-$VersioneCorrente = "1.0.1"
+$VersioneCorrente = "1.0.0"
 
 $PathScript = $MyInvocation.MyCommand.Path
 $LogFile = "$env:TEMP\cleaner_log.txt"
