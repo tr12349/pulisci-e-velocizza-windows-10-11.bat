@@ -2,7 +2,7 @@
 # 🚀 ULTIMATE CLEANER PRO WINDOWS 10 / 11
 # =========================================================
 
-$VersioneCorrente = "1.0.0"
+$VersioneCorrente = "1.0.1"
 
 # =========================
 # 🔐 ADMIN CHECK
@@ -18,77 +18,101 @@ if (-not ([Security.Principal.WindowsPrincipal] `
     ) -Verb RunAs
     exit
 }
-
 # =========================
 # ⚙️ SETUP
 # =========================
+
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
+$VersioneCorrente = "1.0.1"
 
 $PathScript = $MyInvocation.MyCommand.Path
 $LogFile = "$env:TEMP\cleaner_log.txt"
 
-$UrlVersione = "https://raw.githubusercontent.com/UTENTE/REPO/main/versione.txt"
-$UrlCartelle = "https://raw.githubusercontent.com/UTENTE/REPO/main/cartelle.json"
+$UrlVersione = "https://raw.githubusercontent.com/tr12349/pulisci-e-velocizza-windows-10-11.bat/main/versione.txt"
+
+$UrlScript = "https://raw.githubusercontent.com/tr12349/pulisci-e-velocizza-windows-10-11.bat/main/velocizza%20e%20pulisci%20windows%2010-11.ps1"
 
 $SpazioLiberato = 0
-$NuoviPercorsi = @()
 
 function Log($msg) {
-    $msg | Tee-Object -FilePath $LogFile -Append
+$msg | Tee-Object -FilePath $LogFile -Append
 }
 
 # =========================
-# 🌐 AUTO UPDATE SICURO (FIX DEFINITIVO)
+# 🌐 AUTO UPDATE
 # =========================
 
 $VersioneRemota = $VersioneCorrente
-$InternetOK = $true
 
 try {
-    $r = Invoke-WebRequest -Uri $UrlVersione -UseBasicParsing -TimeoutSec 5
-    $v = $r.Content.Trim()
 
-    if ($v -match "^\d+(\.\d+){0,2}$") {
-        $VersioneRemota = $matches[0]
-    }
-}
-catch {
-    $InternetOK = $false
-}
+```
+$VersioneRemota = (
+    Invoke-WebRequest `
+        -Uri $UrlVersione `
+        -UseBasicParsing `
+        -TimeoutSec 5
+).Content.Trim()
 
-if ($InternetOK -and ([version]$VersioneRemota -gt [version]$VersioneCorrente)) {
+if ([version]$VersioneRemota -gt [version]$VersioneCorrente) {
 
-    Log "[UPDATE] Nuova versione: $VersioneRemota"
+    Write-Host ""
+    Write-Host "Nuova versione disponibile: $VersioneRemota" -ForegroundColor Yellow
 
-    try {
-        # ✔ LEGGE SOLO UNA VOLTA
-        $lines = Get-Content $PathScript
+    $Risposta = Read-Host "Vuoi aggiornare? (S/N)"
 
-        # ✔ MODIFICA SOLO LA RIGA VERSIONE
-        for ($i = 0; $i -lt $lines.Count; $i++) {
-            if ($lines[$i] -match '^\$VersioneCorrente\s*=') {
-                $lines[$i] = "`$VersioneCorrente = `"$VersioneRemota`""
-            }
+    if ($Risposta -match '^[Ss]$') {
+
+        Log "[UPDATE] Aggiornamento avviato"
+
+        $TempScript = Join-Path $env:TEMP "ultimate_cleaner_update.ps1"
+
+        Invoke-WebRequest `
+            -Uri $UrlScript `
+            -OutFile $TempScript `
+            -UseBasicParsing
+
+        if (!(Test-Path $TempScript)) {
+            throw "Download fallito"
         }
 
-        # ✔ BACKUP PRIMA DI SCRIVERE
         Copy-Item $PathScript "$PathScript.bak" -Force
 
-        # ✔ SCRITTURA UNICA (NON DOPPIA!)
-        $lines | Set-Content $PathScript -Encoding UTF8
+        $UpdaterPath = Join-Path $env:TEMP "ultimate_cleaner_updater.ps1"
+
+        @"
+```
+
+Start-Sleep -Seconds 2
+
+Copy-Item '$TempScript' '$PathScript' -Force
+
+Start-Process powershell.exe `
+-ArgumentList '-ExecutionPolicy Bypass -File ""$PathScript""'
+"@ | Set-Content $UpdaterPath -Encoding UTF8
+
+```
+        Start-Process powershell.exe `
+            -WindowStyle Hidden `
+            -ArgumentList "-ExecutionPolicy Bypass -File `"$UpdaterPath`""
 
         Log "[UPDATE] Aggiornamento completato"
+
+        exit
     }
-    catch {
-        Copy-Item "$PathScript.bak" $PathScript -Force
-        Log "[UPDATE] Fallito → rollback eseguito"
+    else {
+        Log "[UPDATE] Aggiornamento rifiutato"
     }
-}
-elseif ($InternetOK) {
-    Log "[INFO] Già aggiornato"
 }
 else {
-    Log "[INFO] Offline mode"
+    Log "[INFO] Nessun aggiornamento disponibile"
+}
+```
+
+}
+catch {
+Log "[UPDATE] Errore: $_"
 }
 
 # =========================
