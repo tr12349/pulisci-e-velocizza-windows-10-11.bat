@@ -80,6 +80,7 @@ call :Clean "%ProgramData%\Microsoft\Windows\WER\Temp"
 call :Clean "%ProgramData%\Microsoft\Windows\WER\ReportArchive"
 call :Clean "%ProgramData%\Microsoft\Windows\WER\ReportQueue"
 
+
 :: ==========================================================
 :: ADDITIONAL SAFE CLEAN (LOW RISK SYSTEM + CACHE)
 :: ==========================================================
@@ -92,6 +93,77 @@ call :Clean "C:\Windows\System32\LogFiles\WMI"
 call :Clean "C:\Windows\Logs\CBS"
 call :Clean "C:\Windows\Logs\DISM"
 call :Clean "C:\Windows\Minidump"
+
+
+:: ==========================================================
+:: ADDITIONAL SAFE CLEAN (LOW RISK SYSTEM + CACHE)
+:: ==========================================================
+
+call :Clean "%LOCALAPPDATA%\Microsoft\Windows\WebCache"
+call :Clean "%LOCALAPPDATA%\Microsoft\Windows\INetCache"
+call :Clean "%LOCALAPPDATA%\Microsoft\Windows\INetCookies"
+
+call :Clean "C:\Windows\System32\LogFiles\WMI"
+call :Clean "C:\Windows\Logs\CBS"
+call :Clean "C:\Windows\Logs\DISM"
+call :Clean "C:\Windows\Minidump"
+
+
+:: ==========================================================
+:: GAMES + APPS CACHE CLEAN
+:: ==========================================================
+
+call :Clean "%LOCALAPPDATA%\Roblox\logs"
+call :Clean "%LOCALAPPDATA%\Roblox\Cache"
+call :Clean "%LOCALAPPDATA%\Roblox\Downloads"
+
+call :Clean "%LOCALAPPDATA%\EpicGamesLauncher\Saved\webcache"
+call :Clean "%LOCALAPPDATA%\EpicGamesLauncher\Saved\Logs"
+
+call :Clean "%PROGRAMFILES(X86)%\Steam\appcache"
+call :Clean "%PROGRAMFILES(X86)%\Steam\depotcache"
+
+call :Clean "%LOCALAPPDATA%\Battle.net\Cache"
+
+call :Clean "%APPDATA%\Discord\Cache"
+call :Clean "%APPDATA%\Discord\Code Cache"
+call :Clean "%APPDATA%\Discord\GPUCache"
+call :Clean "%APPDATA%\Discord\Crashpad"
+
+call :Clean "%APPDATA%\Spotify\Storage"
+call :Clean "%APPDATA%\Spotify\Cache"
+
+call :Clean "%APPDATA%\.minecraft\logs"
+call :Clean "%APPDATA%\.minecraft\crash-reports"
+
+call :Clean "%LOCALAPPDATA%\NVIDIA Corporation\NV_Cache"
+call :Clean "%LOCALAPPDATA%\NVIDIA\GLCache"
+
+
+:: ==========================================================
+:: EXTRA APPS CACHE CLEAN (SAFE)
+:: ==========================================================
+
+call :Clean "%APPDATA%\WhatsApp\Cache"
+call :Clean "%APPDATA%\WhatsApp\Code Cache"
+call :Clean "%APPDATA%\WhatsApp\GPUCache"
+call :Clean "%APPDATA%\WhatsApp\Logs"
+call :Clean "%LOCALAPPDATA%\WhatsApp\Temp"
+
+call :Clean "%APPDATA%\Microsoft\Teams\Cache"
+call :Clean "%APPDATA%\Microsoft\Teams\Code Cache"
+call :Clean "%APPDATA%\Microsoft\Teams\GPUCache"
+
+call :Clean "%LOCALAPPDATA%\Microsoft\EdgeWebView\Cache"
+call :Clean "%LOCALAPPDATA%\Microsoft\EdgeWebView\Code Cache"
+call :Clean "%LOCALAPPDATA%\Microsoft\EdgeWebView\GPUCache"
+
+call :Clean "%LOCALAPPDATA%\Packages\*\LocalCache"
+call :Clean "%LOCALAPPDATA%\Packages\*\TempState"
+
+call :Clean "%LOCALAPPDATA%\Riot Games\Riot Client\Cache"
+call :Clean "%LOCALAPPDATA%\EA Desktop\Cache"
+
 
 :: ==========================================================
 :: EXPLORER CACHE
