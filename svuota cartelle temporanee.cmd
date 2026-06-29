@@ -1,6 +1,6 @@
 @echo off
 setlocal EnableExtensions EnableDelayedExpansion
-title Windows Cleanup Tool - Stable Safe Edition
+title Windows Cleanup Tool - PRO ULTIMATE v2
 color 0A
 
 :: ==========================================================
@@ -13,13 +13,17 @@ if %errorlevel% neq 0 (
 )
 
 cd /d "%~dp0"
-cls
 
+:: LOG FILE
+set "LOG=%~dp0cleanup_log.txt"
+echo ==== CLEANUP START %date% %time% ==== > "%LOG%"
+
+cls
 echo ==========================================
-echo   WINDOWS CLEANUP TOOL - STABLE MODE
+echo   WINDOWS CLEANUP TOOL - PRO ULTIMATE v2
 echo ==========================================
 echo.
-echo ATTENZIONE: verranno chiuse alcune app.
+
 pause
 
 
@@ -27,18 +31,21 @@ pause
 :: OPTIONS
 :: ==========================================================
 set "choiceWinSxS=N"
-set /p choiceWinSxS="Pulizia WinSxS aggressiva (Y/N)? "
+set /p choiceWinSxS=WinSxS aggressivo (Y/N)? 
 if /i not "%choiceWinSxS%"=="Y" set "choiceWinSxS=N"
 
 set "choiceShader=N"
-set /p choiceShader="Pulizia cache GPU (Y/N)? "
+set /p choiceShader=Cache GPU (Y/N)? 
 if /i not "%choiceShader%"=="Y" set "choiceShader=N"
 
 
 :: ==========================================================
-:: STOP SERVICES (SAFE)
+:: STOP SERVICES
 :: ==========================================================
-for %%S in (wuauserv bits dosvc) do net stop %%S >nul 2>&1
+for %%S in (wuauserv bits dosvc) do (
+    net stop %%S >nul 2>&1
+    echo STOP SERVICE: %%S>>"%LOG%"
+)
 
 
 :: ==========================================================
@@ -46,27 +53,25 @@ for %%S in (wuauserv bits dosvc) do net stop %%S >nul 2>&1
 :: ==========================================================
 for %%P in (
 chrome.exe msedge.exe brave.exe opera.exe opera_gx.exe vivaldi.exe firefox.exe steam.exe
-) do taskkill /f /im %%P >nul 2>&1
+) do (
+    taskkill /f /im %%P >nul 2>&1
+)
 
 
 :: ==========================================================
-:: STOP EXPLORER (CACHE UNLOCK)
+:: STOP EXPLORER (SAFE)
 :: ==========================================================
 taskkill /f /im explorer.exe >nul 2>&1
 timeout /t 2 >nul
 
 
 :: ==========================================================
-:: TEMP CLEANUP (CORE SAFE)
+:: CORE CLEAN
 :: ==========================================================
 call :Clean "%TEMP%"
 call :Clean "%LOCALAPPDATA%\Temp"
 call :Clean "%WINDIR%\Temp"
 
-
-:: ==========================================================
-:: SYSTEM CACHE SAFE
-:: ==========================================================
 call :Clean "%LOCALAPPDATA%\D3DSCache"
 call :Clean "%LOCALAPPDATA%\FontCache"
 call :Clean "%LOCALAPPDATA%\CrashDumps"
@@ -77,46 +82,34 @@ call :Clean "%ProgramData%\Microsoft\Windows\WER\ReportQueue"
 
 
 :: ==========================================================
-:: EXPLORER CACHE (ICONS / THUMBNAILS)
+:: EXPLORER CACHE
 :: ==========================================================
 call :Clean "%LOCALAPPDATA%\Microsoft\Windows\Explorer"
-
 del /f /q "%LOCALAPPDATA%\IconCache.db" >nul 2>&1
 del /f /q "%LOCALAPPDATA%\Microsoft\Windows\Explorer\thumbcache_*.db" >nul 2>&1
-del /f /q "%LOCALAPPDATA%\Microsoft\Windows\Explorer\iconcache_*.db" >nul 2>&1
 
 
 :: ==========================================================
-:: RECENT FILES (SAFE OPTIONAL)
+:: RECENT FILES
 :: ==========================================================
 del /f /q "%APPDATA%\Microsoft\Windows\Recent\*.lnk" >nul 2>&1
 
 
 :: ==========================================================
-:: WEB CACHE (SAFE METHOD)
-:: ==========================================================
-net stop WebCacheManager >nul 2>&1
-call :Clean "%LOCALAPPDATA%\Microsoft\Windows\WebCache"
-net start WebCacheManager >nul 2>&1
-
-
-:: ==========================================================
-:: WINDOWS UPDATE CACHE (SAFE)
+:: WINDOWS UPDATE CACHE
 :: ==========================================================
 call :Clean "%WINDIR%\SoftwareDistribution\Download"
 call :Clean "%WINDIR%\SoftwareDistribution\DeliveryOptimization"
-del /f /q "%WINDIR%\SoftwareDistribution\ReportingEvents.log" >nul 2>&1
 
 
 :: ==========================================================
-:: EDGE / RDP CACHE
+:: DIAGNOSTIC
 :: ==========================================================
-call :Clean "%LOCALAPPDATA%\Microsoft\Terminal Server Client\Cache"
 call :Clean "%ProgramData%\Microsoft\Diagnosis\ETLLogs"
 
 
 :: ==========================================================
-:: BROWSER CACHE (CHROMIUM BASED)
+:: BROWSER CACHE
 :: ==========================================================
 for %%B in (
 "Google\Chrome\User Data"
@@ -154,7 +147,7 @@ if exist "%LOCALAPPDATA%\Mozilla\Firefox\Profiles" (
 
 
 :: ==========================================================
-:: STEAM CACHE
+:: STEAM (SAFE FIXED)
 :: ==========================================================
 set "STEAM_PATH="
 for /f "tokens=2*" %%A in (
@@ -163,7 +156,7 @@ for /f "tokens=2*" %%A in (
 
 if defined STEAM_PATH (
     set "STEAM_PATH=!STEAM_PATH:/=\!"
-    call :Clean "!STEAM_PATH!\htmlcache"
+    if exist "!STEAM_PATH!\htmlcache" call :Clean "!STEAM_PATH!\htmlcache"
 )
 
 
@@ -175,11 +168,6 @@ if /i "%choiceShader%"=="Y" (
     call :Clean "%LOCALAPPDATA%\NVIDIA\DXCache"
     call :Clean "%APPDATA%\NVIDIA\ComputeCache"
     call :Clean "%LOCALAPPDATA%\AMD\DxCache"
-
-    if defined STEAM_PATH (
-        call :Clean "!STEAM_PATH!\appcache"
-        call :Clean "!STEAM_PATH!\steamapps\shadercache"
-    )
 )
 
 
@@ -190,31 +178,28 @@ powershell -NoProfile -Command "Clear-RecycleBin -Force -ErrorAction SilentlyCon
 
 
 :: ==========================================================
-:: DISM SAFE MODE
+:: DISM
 :: ==========================================================
 echo.
-echo Analisi Component Store...
-DISM /Online /Cleanup-Image /AnalyzeComponentStore >nul
+echo ANALISI COMPONENT STORE...
+DISM /Online /Cleanup-Image /AnalyzeComponentStore >> "%LOG%" 2>&1
 
 if /i "%choiceWinSxS%"=="Y" (
-    echo Pulizia aggressiva WinSxS...
-    DISM /Online /Cleanup-Image /StartComponentCleanup /ResetBase
+    echo AGGRESSIVE CLEANUP>>"%LOG%"
+    DISM /Online /Cleanup-Image /StartComponentCleanup /ResetBase >> "%LOG%" 2>&1
 ) else (
-    echo Pulizia standard WinSxS...
-    DISM /Online /Cleanup-Image /StartComponentCleanup
+    echo STANDARD CLEANUP>>"%LOG%"
+    DISM /Online /Cleanup-Image /StartComponentCleanup >> "%LOG%" 2>&1
 )
-
-
-:: ==========================================================
-:: STORAGE SENSE TRIGGER
-:: ==========================================================
-schtasks /run /tn "\Microsoft\Windows\StorageSense\StorageSenseTask" >nul 2>&1
 
 
 :: ==========================================================
 :: RESTART SERVICES
 :: ==========================================================
-for %%S in (bits wuauserv dosvc) do net start %%S >nul 2>&1
+for %%S in (bits wuauserv dosvc) do (
+    net start %%S >nul 2>&1
+    echo START SERVICE: %%S>>"%LOG%"
+)
 
 
 :: ==========================================================
@@ -223,21 +208,32 @@ for %%S in (bits wuauserv dosvc) do net start %%S >nul 2>&1
 start explorer.exe >nul 2>&1
 
 
+:: ==========================================================
+:: END
+:: ==========================================================
 cls
 echo ==============================
-echo   PULIZIA COMPLETATA
+echo   CLEANUP COMPLETED (PRO)
 echo ==============================
+echo Log saved:
+echo %LOG%
 pause
-exit
+exit /b
 
 
 :: ==========================================================
-:: CLEAN FUNCTION SAFE
+:: CLEAN FUNCTION (SAFE + LOG)
 :: ==========================================================
 :Clean
-if exist "%~1" (
-    attrib -h -s "%~1\*" /s /d >nul 2>&1
-    del /f /s /q "%~1\*" >nul 2>&1
-    for /d %%G in ("%~1\*") do rd /s /q "%%G" >nul 2>&1
+if not exist "%~1" (
+    echo SKIP: %~1>>"%LOG%"
+    exit /b
 )
+
+echo CLEAN: %~1>>"%LOG%"
+
+attrib -h -s "%~1\*" /s /d >nul 2>&1
+del /f /s /q "%~1\*" >nul 2>&1
+for /d %%G in ("%~1\*") do rd /s /q "%%G" >nul 2>&1
+
 exit /b
