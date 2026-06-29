@@ -80,6 +80,18 @@ call :Clean "%ProgramData%\Microsoft\Windows\WER\Temp"
 call :Clean "%ProgramData%\Microsoft\Windows\WER\ReportArchive"
 call :Clean "%ProgramData%\Microsoft\Windows\WER\ReportQueue"
 
+:: ==========================================================
+:: ADDITIONAL SAFE CLEAN (LOW RISK SYSTEM + CACHE)
+:: ==========================================================
+
+call :Clean "%LOCALAPPDATA%\Microsoft\Windows\WebCache"
+call :Clean "%LOCALAPPDATA%\Microsoft\Windows\INetCache"
+call :Clean "%LOCALAPPDATA%\Microsoft\Windows\INetCookies"
+
+call :Clean "C:\Windows\System32\LogFiles\WMI"
+call :Clean "C:\Windows\Logs\CBS"
+call :Clean "C:\Windows\Logs\DISM"
+call :Clean "C:\Windows\Minidump"
 
 :: ==========================================================
 :: EXPLORER CACHE
