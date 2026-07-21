@@ -7523,41 +7523,7 @@ if exist C:\Windows\Logs\MeasuredBoot (del /f /q /s C:\Windows\Logs\MeasuredBoot
 :: [Passo 724]
 call :Avanzamento
 if exist "%LocalAppData%\Microsoft\Terminal Server Client\Cache" (rmdir /s /q "%LocalAppData%\Microsoft\Terminal Server Client\Cache" >nul 2>&1)
-:: [Passo 716]
-call :Avanzamento
-if exist "C:\ProgramData\Microsoft\LiveUpdate" (del /f /q /s "C:\ProgramData\Microsoft\LiveUpdate\*" >nul 2>&1)
 
-:: [Passo 717]
-call :Avanzamento
-if exist C:\Windows\System32\AppXDeploymentServer (del /f /q /s C:\Windows\System32\AppXDeploymentServer\*.log >nul 2>&1)
-
-:: [Passo 718]
-call :Avanzamento
-if exist "%ProgramData%\Microsoft\MapData" (del /f /q /s "%ProgramData%\Microsoft\MapData\*" >nul 2>&1)
-
-:: [Passo 719]
-call :Avanzamento
-if exist C:\Windows\System32\CompatTelRunner (del /f /q /s C:\Windows\System32\CompatTelRunner\*.tmp >nul 2>&1)
-
-:: [Passo 720]
-call :Avanzamento
-if exist "%LocalAppData%\Microsoft\Windows Photo Viewer" (rmdir /s /q "%LocalAppData%\Microsoft\Windows Photo Viewer" >nul 2>&1)
-
-:: [Passo 721]
-call :Avanzamento
-if exist "%ProgramData%\Microsoft\Crypto\RSA\S-1-5-18" (del /f /q /s "%ProgramData%\Microsoft\Crypto\RSA\S-1-5-18\*.tmp" >nul 2>&1)
-
-:: [Passo 722]
-call :Avanzamento
-if exist "C:\ProgramData\Microsoft\Windows Defender\Scans\History\Nis" (del /f /q /s "C:\ProgramData\Microsoft\Windows Defender\Scans\History\Nis\*" >nul 2>&1)
-
-:: [Passo 723]
-call :Avanzamento
-if exist C:\Windows\Logs\MeasuredBoot (del /f /q /s C:\Windows\Logs\MeasuredBoot\* >nul 2>&1)
-
-:: [Passo 724]
-call :Avanzamento
-if exist "%LocalAppData%\Microsoft\Terminal Server Client\Cache" (rmdir /s /q "%LocalAppData%\Microsoft\Terminal Server Client\Cache" >nul 2>&1)
 echo 
 cls
 echo =======================================================
@@ -7571,26 +7537,3 @@ echo =======================================================
 pause
 exit
 
-echo 
-cls
-echo =======================================================
-echo    âœ… OTTIMIZZAZIONE COMPLETATA CON SUCCESSO!
-echo =======================================================
-echo.
-echo ðŸ•’ Ora inizio: %ora_inizio%
-echo ðŸ•’ Ora fine  : %TIME:~0,8%
-echo.
-echo =======================================================
-pause
-exitecho 
-cls
-echo =======================================================
-echo    âœ… OTTIMIZZAZIONE COMPLETATA CON SUCCESSO!
-echo =======================================================
-echo.
-echo  ðŸ•’ Ora inizio: %ora_inizio%
-echo  ðŸ•’ Ora fine  : %TIME:~0,8%
-echo.
-echo =======================================================
-pause
-exit
