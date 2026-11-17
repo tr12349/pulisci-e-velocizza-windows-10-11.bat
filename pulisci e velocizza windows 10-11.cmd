@@ -18,7 +18,7 @@ if %errorlevel% neq 0 (
 color 0B
 title PULIZIA ESTREMA + COMPRESSIONE LZX - WINDOWS
 set "ora_inizio=%TIME:~0,8%"
-set "total_steps=48"
+set "total_steps=30"
 set "current_step=0"
 
 for /f "tokens=*" %%a in ('powershell -NoProfile -Command "[math]::Round((Get-PSDrive C).Free / 1GB, 2)"') do set "spazio_prima=%%a"
